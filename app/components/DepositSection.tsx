@@ -671,7 +671,10 @@ export default function DepositSection() {
       <div className="mb-6 text-left"><h1 className="text-4xl font-black tracking-tight text-black mb-2">Web3 Wallet</h1></div>
 
       <div className="w-full bg-white border-2 border-black p-5 mb-8 max-w-3xl mx-auto">
-        <div className="flex justify-between items-end mb-2"><p className="text-xs font-black font-bold uppercase">WALLET残高</p><div className="text-right"><p className="text-2xl font-mono font-bold text-black">{animatedWalletBalance.toFixed(6)} <span className="text-sm text-gray-400">SOL</span></p></div></div>
+        <div className="flex flex-col mb-3">
+            <p className="text-xs font-black font-bold mb-1 text-gray-500 uppercase tracking-wider">Wallet残高</p>
+            <p className="text-4xl font-mono font-black text-black tracking-tighter">{animatedWalletBalance.toFixed(6)} <span className="text-lg text-gray-400 font-bold">SOL</span></p>
+        </div>
         <button onClick={copyAddress} className={`w-full text-left border border-black py-2 px-3 font-mono text-xs text-gray-500 flex justify-between items-center group transition-colors duration-200 ${isCopied ? 'bg-[#EEFF77]' : 'bg-white hover:bg-gray-50'}`}>
             <span>{shortAddress}</span><span className={`text-black font-bold ${isCopied ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>{isCopied ? 'COPIED!' : 'COPY'}</span>
         </button>
@@ -697,7 +700,7 @@ export default function DepositSection() {
                 ) : (
                     <>
                         <div className="text-center w-full bg-white border-2 border-black p-6">
-                            <p className="text-xs font-black font-bold uppercase tracking-[0.1em] mb-3">Grow Box残高</p>
+                            <p className="text-xs font-black font-bold tracking-[0.1em] mb-3">Grow Box残高</p>
                             <div className="flex items-baseline justify-center"><span className="text-6xl font-black tracking-tighter text-black leading-none font-mono">{animatedVaultBalance.toFixed(2)}</span><span className="text-2xl font-bold ml-2 text-gray-500">SOL</span></div>
                         </div>
                         <div className="flex flex-col gap-2">
@@ -711,7 +714,7 @@ export default function DepositSection() {
                             </div>
                         </div>
                         <div className="w-full mt-4">
-                            <p className="text-xs font-black font-bold mb-2 uppercase tracking-wider text-left">Grow Box入出金履歴</p>
+                            <p className="text-xs font-black font-bold mb-2 tracking-wider text-left">Grow Box入出金履歴</p>
                             <div className="w-full h-[300px] overflow-y-auto bg-white border-2 border-black p-2 space-y-2">
                                 {vaultHistory.length === 0 ? (
                                     <div className="h-full flex items-center justify-center text-gray-300 font-bold text-sm">履歴はありません</div>
@@ -756,13 +759,13 @@ export default function DepositSection() {
                                     className="w-full h-full object-contain" 
                                 />
                             </div>
-                            <p className="text-xs text-black font-bold uppercase tracking-widest">My Grow Box NFT</p>
+                            <p className="text-xs text-black font-bold tracking-widest">My Grow Box NFT</p>
                             {/* 発行済みNFTのアドレス表示 */}
                             {nftMintAddress && <p className="text-[10px] font-mono text-gray-400 mt-2">Mint: {nftMintAddress}</p>}
                         </div>
 
                         <div className="w-full flex justify-between items-end mb-2">
-                            <p className="text-xs font-black font-bold uppercase tracking-[0.1em]">リワード</p>
+                            <p className="text-xs font-black font-bold tracking-[0.1em]">リワード</p>
                             {/* <button onClick={handleResetRewards} disabled={actionLoading} className="text-[10px] font-bold border border-black px-2 py-0.5 hover:bg-black hover:text-white transition-colors">リセット</button> */}
                         </div>
 
@@ -788,7 +791,7 @@ export default function DepositSection() {
                 {/* 送金フォーム (1つの枠内にまとめる) */}
                 <div>
                   {/* 見出しを枠の外へ */}
-                  <p className="text-xs font-black font-bold uppercase mb-2">WALLETから送金</p>
+                  <p className="text-xs font-black font-bold mb-2">Walletから送金</p>
                   
                   {/* 枠線の中身 */}
                   <div className="bg-white border-2 border-black p-6">
@@ -838,7 +841,7 @@ export default function DepositSection() {
                 {/* 履歴エリア */}
                 <div className="flex flex-col h-[400px]">
                     <div className="flex justify-between items-end mb-2">
-                        <p className="text-xs font-black font-bold uppercase tracking-wider">SOL 送金履歴</p>
+                        <p className="text-xs font-black font-bold tracking-wider">SOL 送金履歴</p>
                     </div>
                     <div className="flex-1 overflow-y-auto bg-white border-2 border-black p-2 space-y-2">
                         {transferHistory.length === 0 ? (
