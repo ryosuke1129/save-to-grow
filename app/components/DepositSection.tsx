@@ -659,7 +659,7 @@ export default function DepositSection() {
                               <p className="text-[10px] font-bold text-black mb-1">送金先アドレス</p>
                               <div className="flex flex-col md:flex-row gap-3">
                                   <input type="text" value={recipientAddress} onChange={(e) => setRecipientAddress(e.target.value)} className="w-full md:flex-1 h-14 pl-4 text-sm font-mono border-2 border-black focus:outline-none bg-gray-50" placeholder="ウォレットアドレスを入力" />
-                                  <button onClick={transfer} disabled={actionLoading || !transferAmountInput || !recipientAddress || parseFloat(transferAmountInput) <= 0 || walletBalance < parseFloat(transferAmountInput)} className="h-14 px-8 bg-black text-white text-xl font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap">送金する</button>
+                                  <button onClick={transfer} disabled={actionLoading || !transferAmountInput || !recipientAddress || parseFloat(transferAmountInput) <= 0 || walletBalance < parseFloat(transferAmountInput)} className="h-14 px-8 bg-black text-white font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap">送金する</button>
                                 </div>
                             </div>
                         </div>
