@@ -8,24 +8,21 @@ const supabase = createClient(
 );
 
 const NETWORK_URL = process.env.NEXT_PUBLIC_SOLANA_NETWORK!;
-// 配布用ウォレットの秘密鍵 (配列形式の文字列)
 const ADMIN_SECRET = JSON.parse(process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY || "[]");
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { action, userId, amount, durationHours, lockId, userAddress } = body;
+    // ★ force を受け取れるように追加
+    const { action, userId, amount, durationHours, lockId, userAddress, force } = body;
 
     // --- ロック作成 (Gas無料) ---
     if (action === 'create') {
       const now = new Date();
-      // 終了時間を計算
       const endsAt = new Date(now.getTime() + durationHours * 60 * 60 * 1000);
       
-      // リワード計算 (年利5% = 0.05)
-      // リワード = 金額 * 0.05 * (時間 / 24 / 365)
-      // ※ 簡易計算: 時間 / 8760時間
-      const apy = 0.05;
+      // ★ リワード計算 (年利10% = 0.10 に変更)
+      const apy = 0.10;
       const reward = amount * apy * (durationHours / 8760);
 
       const { error } = await supabase.from('box_locks').insert([{
@@ -43,7 +40,6 @@ export async function POST(request: Request) {
 
     // --- ロック解除 & リワード付与 ---
     if (action === 'unlock') {
-      // 1. ロック情報を取得
       const { data: lockData, error } = await supabase
         .from('box_locks')
         .select('*')
@@ -54,25 +50,32 @@ export async function POST(request: Request) {
       if (error || !lockData) throw new Error("ロック情報が見つかりません");
       if (lockData.status !== 'active') throw new Error("既に解除済みです");
 
-      // 2. 時間チェック
-      if (new Date() < new Date(lockData.ends_at)) {
+      // ★ 強制解除ロジック
+      const isTimeOver = new Date() >= new Date(lockData.ends_at);
+      
+      // 期間中で、かつ強制解除フラグがない場合はエラー
+      if (!isTimeOver && !force) {
         throw new Error("まだロック期間中です");
       }
 
-      // 3. 運営ウォレットからリワードのみ送金
-      const connection = new Connection(NETWORK_URL, "confirmed");
-      const adminWallet = Keypair.fromSecretKey(new Uint8Array(ADMIN_SECRET));
-      const recipient = new PublicKey(userAddress);
-      const rewardLamports = Math.floor(lockData.reward_amount * LAMPORTS_PER_SOL);
-
-      // 残高チェック
-      const adminBalance = await connection.getBalance(adminWallet.publicKey);
-      if (adminBalance < rewardLamports) {
-        throw new Error("運営ウォレットの残高不足によりリワードを付与できません");
+      // ★ 期間中の強制解除ならリワードは0にする
+      let finalRewardAmount = lockData.reward_amount;
+      if (!isTimeOver && force) {
+        finalRewardAmount = 0;
       }
 
-      // 送金トランザクション
-      if (rewardLamports > 0) {
+      // 3. 運営ウォレットからリワード送金 (リワードがある場合のみ)
+      if (finalRewardAmount > 0) {
+        const connection = new Connection(NETWORK_URL, "confirmed");
+        const adminWallet = Keypair.fromSecretKey(new Uint8Array(ADMIN_SECRET));
+        const recipient = new PublicKey(userAddress);
+        const rewardLamports = Math.floor(finalRewardAmount * LAMPORTS_PER_SOL);
+
+        const adminBalance = await connection.getBalance(adminWallet.publicKey);
+        if (adminBalance < rewardLamports) {
+          throw new Error("運営ウォレットの残高不足によりリワードを付与できません");
+        }
+
         const transaction = new Transaction().add(
           SystemProgram.transfer({
             fromPubkey: adminWallet.publicKey,
@@ -86,7 +89,7 @@ export async function POST(request: Request) {
       // 4. ステータス更新 (解除済みにする)
       await supabase.from('box_locks').update({ status: 'claimed' }).eq('id', lockId);
 
-      return NextResponse.json({ success: true, reward: lockData.reward_amount });
+      return NextResponse.json({ success: true, reward: finalRewardAmount });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });

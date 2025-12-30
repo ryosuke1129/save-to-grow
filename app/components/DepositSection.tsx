@@ -340,8 +340,15 @@ export default function DepositSection() {
     }
   };
 
-  const handleUnlock = async (lockId: string) => {
+  const handleUnlock = async (lockId: string, force: boolean = false) => {
     if (!myWallet || !session) return;
+    
+    if (force) {
+        if (!confirm("【警告】\nロック期間中ですが強制解除しますか？\n\n※強制解除の場合、リワード(利息)は受け取れません。\n※元本のみロックが解除され、出金可能になります。")) {
+            return;
+        }
+    }
+
     setActionLoading(true);
     try {
         const res = await fetch('/api/lock', {
@@ -350,13 +357,19 @@ export default function DepositSection() {
                 action: 'unlock',
                 userId: session.user.id,
                 lockId: lockId,
-                userAddress: myWallet.publicKey.toString()
+                userAddress: myWallet.publicKey.toString(),
+                force: force // ★追加
             })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        alert(`ロック解除成功！ リワード: +${data.reward} SOL をWalletに受け取りました`);
+        if (force) {
+            alert("強制解除しました。ロック枠が解放されました。");
+        } else {
+            alert(`ロック解除成功！ リワード: +${data.reward} SOL をWalletに受け取りました`);
+        }
+        
         fetchLocks(session.user.id);
         fetchVault();
         fetchWalletBalance();
@@ -551,7 +564,7 @@ export default function DepositSection() {
                                     <span className="font-bold text-red-500">ロック中は出金できません。</span>
                                 </p>
                                 <span className="bg-[#EEFF77] text-black text-[10px] font-black px-2 py-1 whitespace-nowrap ml-2">
-                                    利率 5.0%
+                                    利率 10.0%
                                 </span>
                             </div>
 
@@ -606,10 +619,14 @@ export default function DepositSection() {
                                                             ロック解除
                                                         </button>
                                                     ) : (
-                                                        <div className="flex items-center gap-1 text-gray-400">
-                                                            <span className="text-xs font-bold">ロック中</span>
-                                                            <span className="block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                                                        </div>
+                                                        <button 
+                                                            onClick={() => handleUnlock(lock.id, true)} // 強制解除フラグ true
+                                                            className="flex items-center gap-1 text-gray-400 hover:text-red-500 transition-colors cursor-pointer group"
+                                                            title="タップして強制解除"
+                                                        >
+                                                            <span className="text-xs font-bold group-hover:underline">ロック中</span>
+                                                            <span className="block w-2 h-2 bg-red-500 rounded-full animate-pulse group-hover:bg-red-600"></span>
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>
