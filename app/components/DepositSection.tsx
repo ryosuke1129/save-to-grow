@@ -514,7 +514,7 @@ export default function DepositSection() {
                             </p>
 
                             <div className="mb-4">
-                                <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能額: {availableToWithdraw.toFixed(2)} SOL)</p>
+                                <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能: {availableToWithdraw.toFixed(2)} SOL)</p>
                                 <div className="relative w-full">
                                     <input 
                                         type="number" 
@@ -545,7 +545,7 @@ export default function DepositSection() {
                             <button 
                                 onClick={handleLock} 
                                 disabled={actionLoading || availableToWithdraw <= 0}
-                                className="w-full h-14 bg-black text-white border-2 border-black font-black hover:brightness-95 transition-all disabled:opacity-50 disabled:bg-gray-200"
+                                className="w-full h-14 bg-black text-white border-2 border-black font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:bg-gray-200"
                             >
                                 ロックする
                             </button>
@@ -589,7 +589,7 @@ export default function DepositSection() {
                                                             ロック解除
                                                         </button>
                                                     ) : (
-                                                        <div className="flex items-center gap-1 text-black">
+                                                        <div className="flex items-center gap-1 text-gray-400">
                                                             <span className="text-xs font-bold">ロック中</span>
                                                             <span className="block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                                         </div>
