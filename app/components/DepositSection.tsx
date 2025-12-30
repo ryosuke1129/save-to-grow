@@ -749,7 +749,7 @@ export default function DepositSection() {
                 ) : (
                     <>
                         <div className="mb-6 relative group cursor-default text-center w-full border-2 border-black p-8">
-                            <div className="w-[200px] h-[150px] mx-auto flex items-center justify-center overflow-hidden mb-4">
+                            <div className="w-[200px] h-[100px] mx-auto flex items-center justify-center overflow-hidden mb-4">
                                 <img 
                                     src={gifData.src} 
                                     alt={gifData.alt} 
