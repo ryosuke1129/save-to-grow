@@ -60,7 +60,7 @@ class SimpleWallet {
 export default function DepositSection() {
   const [mounted, setMounted] = useState(false); 
   // ★ 'lock' タブを追加
-  const [activeTab, setActiveTab] = useState<'lock' | 'box' | 'transfer' | 'nft'>('lock');
+  const [activeTab, setActiveTab] = useState<'lock' | 'box' | 'transfer' | 'nft'>('nft');
 
   const [email, setEmail] = useState("");
   const [session, setSession] = useState<any>(null);
@@ -376,20 +376,20 @@ export default function DepositSection() {
 
   if (!mounted) return null;
   if (!session) return <div className="p-8 text-center mt-20 font-bold border-2 border-black max-w-md mx-auto">ログインしてください<form onSubmit={handleLogin} className="mt-4"><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="border-2 border-black p-2 w-full mb-2" required placeholder="Email"/><button type="submit" className="bg-black text-white w-full p-2 font-bold">{authLoading?"送信中...":"ログイン"}</button></form></div>;
-  if (loading) return <div className="h-screen flex items-center justify-center font-bold text-2xl animate-pulse">Loading...</div>;
-  if (!myWallet) return ( /* ウォレット作成画面 (既存コードのまま) */ <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 font-sans min-h-[600px] flex flex-col justify-center relative"><div className="absolute top-4 right-4"><button onClick={handleLogout} className="text-xs text-gray-400 font-bold underline">Logout</button></div><div className="flex flex-col items-center w-full max-w-md mx-auto"><h2 className="text-2xl font-black mb-4">Welcome</h2><button onClick={createNewWallet} className="w-full h-14 bg-black text-white font-bold">ウォレット作成</button></div></div> );
+  if (loading) return <div className="h-screen flex items-center justify-center font-bold text-2xl animate-pulse">Wallet Loading...</div>;
+  if (!myWallet) return ( /* ウォレット作成画面 (既存コードのまま) */ <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 font-sans min-h-[600px] flex flex-col justify-center relative"><div className="absolute top-4 right-4"><button onClick={handleLogout} className="text-xs text-gray-400 font-bold underline">ログアウト</button></div><div className="flex flex-col items-center w-full max-w-md mx-auto"><h2 className="text-2xl font-black mb-4">Welcome</h2><button onClick={createNewWallet} className="w-full h-14 bg-black text-white font-bold">ウォレット作成</button></div></div> );
 
   return (
     <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 animate-fade-in font-sans min-h-[600px] flex flex-col relative">
       <div className="absolute top-4 right-4 md:top-8 md:right-8">
-        <div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email?.split('@')[0]}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">Logout</button></div>
+        <div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email?.split('@')[0]}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">ログアウト</button></div>
       </div>
 
       <div className="mb-6 text-left"><h1 className="text-4xl font-black tracking-tight text-black mb-2">Web3 Wallet</h1></div>
 
       <div className="w-full bg-white border-2 border-black p-5 mb-8 max-w-3xl mx-auto">
         <div className="flex flex-col mb-2">
-            <p className="text-xs font-black font-bold mb-1 text-gray-500 tracking-wider text-left">Wallet残高</p>
+            <p className="text-xs font-black font-bold mb-1 text-black tracking-wider text-left">Wallet残高</p>
             <p className="text-4xl font-mono font-black text-black tracking-tighter text-right">{animatedWalletBalance.toFixed(6)} <span className="text-lg text-gray-400 font-bold">SOL</span></p>
         </div>
         <button onClick={copyAddress} className={`w-full text-left border border-black py-2 px-3 font-mono text-xs text-gray-500 flex justify-between items-center group transition-colors duration-200 ${isCopied ? 'bg-[#EEFF77]' : 'bg-white hover:bg-gray-50'}`}>
@@ -400,8 +400,8 @@ export default function DepositSection() {
       {/* タブ切り替え: LockBoxを左に追加 */}
       <div className="flex w-full max-w-2xl mx-auto mb-8 border-b-2 border-gray-100 gap-1 md:gap-8 overflow-x-auto">
         <button onClick={() => setActiveTab('nft')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'nft' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>NFT</button>
-        <button onClick={() => setActiveTab('box')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'box' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>GrowBox</button>
-        <button onClick={() => setActiveTab('lock')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'lock' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>LockSOL</button>
+        <button onClick={() => setActiveTab('box')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'box' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Box</button>
+        <button onClick={() => setActiveTab('lock')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'lock' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Lock</button>
         <button onClick={() => setActiveTab('transfer')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'transfer' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>送金</button>
       </div>
 
@@ -413,7 +413,7 @@ export default function DepositSection() {
              <div className="flex flex-col items-center">
                 {!isInitialized ? (
                     <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
-                        <p className="text-gray-400 font-bold mb-4">NFTを発行するには<br/>Grow Boxを開設してください</p>
+                        <p className="text-gray-400 font-bold mb-4">NFTを発行するには<br/>Boxを開設してください</p>
                         <button onClick={() => setActiveTab('box')} className="text-sm border-b-2 border-black pb-1 font-bold">Boxタブへ移動</button>
                     </div>
                 ) : (
@@ -422,14 +422,14 @@ export default function DepositSection() {
                             <div className="w-[200px] h-[100px] mx-auto flex items-center justify-center overflow-hidden mb-4">
                                 <img src={gifData.src} alt={gifData.alt} className="w-full h-full object-contain" />
                             </div>
-                            <p className="text-xs text-black font-bold tracking-widest">My Grow Box NFT</p>
+                            <p className="text-xs text-black font-bold tracking-widest">My Box NFT</p>
                             {nftMintAddress && <p className="text-[10px] font-mono text-gray-400 mt-2">Mint: {nftMintAddress}</p>}
                         </div>
                         <div className="w-full flex justify-between items-end mb-2"><p className="text-xs font-black font-bold tracking-[0.1em]">リワード</p></div>
                         <div className="text-center w-full bg-white border-2 border-black p-6 mb-6">
                             <div className="flex items-baseline justify-center"><span className="text-3xl font-black tracking-tighter text-black leading-none font-mono">{animatedReward.toFixed(2)}</span><span className="text-sm font-bold ml-1 text-gray-500">Points</span></div>
                         </div>
-                        <p className="text-xs text-gray-400 text-center leading-relaxed">このNFTはGrow Boxの残高に応じて見た目が変化します。<br/>5 SOL以上預けると"何か"に進化します。</p>
+                        <p className="text-xs text-gray-400 text-center leading-relaxed">このNFTはBoxの残高に応じて見た目が変化します。<br/>5 SOL以上預けると"何か"に進化します。</p>
                     </>
                 )}
             </div>
@@ -440,14 +440,14 @@ export default function DepositSection() {
             <div className="flex flex-col gap-6">
                 {!isInitialized ? (
                      <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-gray-300 p-6 rounded min-h-[300px]">
-                        <p className="text-gray-400 font-bold mb-4">Grow Boxが未開設です</p>
+                        <p className="text-gray-400 font-bold mb-4">Boxが未開設です</p>
                         <button onClick={initializeVault} disabled={actionLoading || walletBalance < 0.01} className="w-full max-w-xs h-14 bg-black text-white text-lg font-extrabold hover:bg-gray-800 transition-colors duration-200 disabled:opacity-30"> {walletBalance < 0.01 ? "残高不足 (要SOL)" : "Boxを開設する"} </button>
                         <p className="text-xs text-gray-400 mt-2">※開設と同時にNFTが発行されます</p>
                      </div>
                 ) : (
                     <>
                         <div className="text-center w-full bg-white border-2 border-black p-6">
-                            <p className="text-xs font-black font-bold tracking-[0.1em] mb-3">Grow Box残高</p>
+                            <p className="text-xs font-black font-bold tracking-[0.1em] mb-3">Box残高</p>
                             <div className="flex items-baseline justify-center"><span className="text-5xl font-black tracking-tighter text-black leading-none font-mono">{animatedVaultBalance.toFixed(2)}</span><span className="text-2xl font-bold ml-2 text-gray-500">SOL</span></div>
                             {/* ★ロック中金額の表示を追加 */}
                             {totalLockedAmount > 0 && (
@@ -467,7 +467,7 @@ export default function DepositSection() {
                             </div>
                         </div>
                         <div className="w-full mt-4">
-                            <p className="text-xs font-black font-bold mb-2 tracking-wider text-left">Grow Box入出金履歴</p>
+                            <p className="text-xs font-black font-bold mb-2 tracking-wider text-left">Box入出金履歴</p>
                             <div className="w-full h-[300px] overflow-y-auto bg-white border-2 border-black p-2 space-y-2">
                                 {vaultHistory.length === 0 ? (
                                     <div className="h-full flex items-center justify-center text-gray-300 font-bold text-sm">履歴はありません</div>
@@ -494,7 +494,7 @@ export default function DepositSection() {
             <div className="flex flex-col gap-6">
                  {!isInitialized ? (
                      <div className="flex flex-col items-center justify-center min-h-[300px] border-2 border-dashed border-gray-300 p-6 rounded">
-                        <p className="text-gray-400 font-bold mb-4">まずはGrow Boxを開設して入金してください</p>
+                        <p className="text-gray-400 font-bold mb-4">まずはBoxを開設して入金してください</p>
                         <button onClick={() => setActiveTab('box')} className="text-sm font-bold border-b-2 border-black pb-1">Boxタブへ移動</button>
                      </div>
                 ) : (
@@ -509,7 +509,7 @@ export default function DepositSection() {
                           <div className="w-full bg-white border-2 border-black p-6">
                             
                             <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                                Grow Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
+                                Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
                                 <span className="font-bold text-red-500">ロック中は出金できません。</span>
                             </p>
 
@@ -534,7 +534,7 @@ export default function DepositSection() {
                                         <button 
                                             key={h}
                                             onClick={() => setLockDuration(h)}
-                                            className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-gray-400 hover:text-black'}`}
+                                            className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-blackhover:text-black'}`}
                                         >
                                             {h}時間
                                         </button>
@@ -578,7 +578,7 @@ export default function DepositSection() {
                                                 </div>
 
                                                 <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
-                                                    <div className="text-[10px] font-mono text-gray-400">
+                                                    <div className="text-[10px] font-mono text-black">
                                                         ロック終了: {ends.toLocaleString()}
                                                     </div>
                                                     {isUnlockable ? (
@@ -589,7 +589,7 @@ export default function DepositSection() {
                                                             ロック解除
                                                         </button>
                                                     ) : (
-                                                        <div className="flex items-center gap-1 text-gray-400">
+                                                        <div className="flex items-center gap-1 text-black">
                                                             <span className="text-xs font-bold">ロック中</span>
                                                             <span className="block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                                         </div>
