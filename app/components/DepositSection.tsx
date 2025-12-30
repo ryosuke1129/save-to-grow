@@ -799,7 +799,7 @@ export default function DepositSection() {
                                       value={recipientAddress} 
                                       onChange={(e) => setRecipientAddress(e.target.value)} 
                                       /* ★ここを h-14 に変更（背景も白に合わせて統一感を出すなら bg-white に変更してもOK） */
-                                      className="flex-1 h-14 pl-4 text-sm font-mono border-2 border-black focus:outline-none bg-gray-50" 
+                                      className="w-full md:flex-1 h-14 pl-4 text-sm font-mono border-2 border-black focus:outline-none bg-gray-50" 
                                       placeholder="ウォレットアドレスを入力" 
                                   />
                                   <button 
