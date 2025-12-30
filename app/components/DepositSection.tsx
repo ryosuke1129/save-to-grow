@@ -507,7 +507,7 @@ export default function DepositSection() {
                                   Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
                                   <span className="font-bold text-red-500">ロック中は出金できません。</span>
                               </p>
-                              <span className="bg-[#EEFF77] text-black text-[10px] font-bold px-2 py-1 whitespace-nowrap ml-2">
+                              <span className="bg-[#EEFF77] text-black text-[10px] font-black px-2 py-1 whitespace-nowrap ml-2">
                                   利率 5.0%
                               </span>
                           </div>
