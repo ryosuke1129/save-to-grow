@@ -87,7 +87,7 @@ export default function DepositSection() {
   // ★ LockBox用のState
   const [activeLocks, setActiveLocks] = useState<LockRecord[]>([]);
   const [lockAmountInput, setLockAmountInput] = useState("");
-  const [lockDuration, setLockDuration] = useState<number>(1); // デフォルト1時間
+  const [lockDuration, setLockDuration] = useState<number>(5 / 60); // デフォルト5分
 
   const [highlightId, setHighlightId] = useState<string | null>(null);
 
@@ -315,7 +315,7 @@ export default function DepositSection() {
     if (isNaN(val) || val <= 0) { alert("金額を入力してください"); return; }
     if (val > availableToWithdraw) { alert("Grow Box内の利用可能残高が足りません"); return; }
 
-    if(!confirm(`${val} SOLを ${lockDuration}時間 ロックしますか？\n期間中は出金できません。`)) return;
+    if(!confirm(`${val} SOLをロックしますか？\n期間中は出金できません。`)) return;
 
     setActionLoading(true);
     try {
@@ -356,7 +356,7 @@ export default function DepositSection() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        alert(`ロック解除成功！ リワード: +${data.reward} SOL を受け取りました`);
+        alert(`ロック解除成功！ リワード: +${data.reward} SOL をWalletに受け取りました`);
         fetchLocks(session.user.id);
         fetchVault();
         fetchWalletBalance();
@@ -642,7 +642,7 @@ export default function DepositSection() {
                               <p className="text-[10px] font-bold text-black mb-1">送金先アドレス</p>
                               <div className="flex flex-col md:flex-row gap-3">
                                   <input type="text" value={recipientAddress} onChange={(e) => setRecipientAddress(e.target.value)} className="w-full md:flex-1 h-14 pl-4 text-sm font-mono border-2 border-black focus:outline-none bg-gray-50" placeholder="ウォレットアドレスを入力" />
-                                  <button onClick={transfer} disabled={actionLoading || !transferAmountInput || !recipientAddress || parseFloat(transferAmountInput) <= 0 || walletBalance < parseFloat(transferAmountInput)} className="h-14 px-8 bg-black text-white text-sm font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap">送金</button>
+                                  <button onClick={transfer} disabled={actionLoading || !transferAmountInput || !recipientAddress || parseFloat(transferAmountInput) <= 0 || walletBalance < parseFloat(transferAmountInput)} className="h-14 px-8 bg-black text-white text-xs font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap">送金</button>
                                 </div>
                             </div>
                         </div>
