@@ -568,7 +568,7 @@ export default function DepositSection() {
                                             <div key={lock.id} className="bg-white border-2 border-black p-4 relative overflow-hidden">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div>
-                                                        <span className="text-2xl font-black font-mono block">{lock.amount} <span className="text-sm text-gray-400">SOL</span></span>
+                                                        <span className="text-2xl font-black font-mono block">{lock.amount.toFixed(2)} <span className="text-sm text-gray-400">SOL</span></span>
                                                         <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1 py-0.5 rounded">{lock.duration_hours}時間ロック</span>
                                                     </div>
                                                     <div className="text-right">
