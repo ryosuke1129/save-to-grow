@@ -635,7 +635,7 @@ export default function DepositSection() {
   if (!myWallet) {
     return (
         <div className="w-full max-w-5xl mx-auto bg-white p-6 md:p-12 animate-fade-in font-sans min-h-[600px] flex flex-col justify-center relative">
-            <div className="absolute top-4 right-4 md:top-8 md:right-8"><div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">Logout</button></div></div>
+            <div className="absolute top-4 right-4 md:top-8 md:right-8"><div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email?.split('@')[0]}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">Logout</button></div></div>
             <div className="flex flex-col items-center w-full max-w-md mx-auto my-8">
                 <div className="mb-8"><span className="text-6xl text-gray-300 font-light">+</span></div>
                 <h2 className="text-2xl font-black text-black mb-4">Welcome to Web3 Wallet</h2>
@@ -649,7 +649,7 @@ export default function DepositSection() {
   return (
     <div className="w-full max-w-5xl mx-auto bg-white p-6 md:p-12 animate-fade-in font-sans min-h-[600px] flex flex-col relative">
       <div className="absolute top-4 right-4 md:top-8 md:right-8">
-        <div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">Logout</button></div>
+        <div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email?.split('@')[0]}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">Logout</button></div>
       </div>
 
       <div className="mb-6 text-left"><h1 className="text-4xl font-black tracking-tight text-black mb-2">Web3 Wallet</h1></div>
