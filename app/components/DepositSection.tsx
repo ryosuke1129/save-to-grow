@@ -500,7 +500,7 @@ export default function DepositSection() {
                 ) : (
                     <>
                         {/* ロック入力エリア */}
-                        <div className="w-full bg-white border-2 border-black p-6">
+                        <div className="flex w-full bg-white border-2 border-black p-6">
                           {/* タイトル削除 & 利率を枠内に移動 */}
                           <div className="flex justify-between items-start mb-6">
                               <p className="text-xs text-gray-500 leading-relaxed">
