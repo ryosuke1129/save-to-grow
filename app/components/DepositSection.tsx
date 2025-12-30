@@ -309,7 +309,7 @@ export default function DepositSection() {
     e.preventDefault();
     setAuthLoading(true);
     const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}`, }, });
-    if (error) { alert(error.message); } else { alert("ログインリンクをメールに送信しました！"); }
+    if (error) { alert(error.message); } else { alert("ログインリンクを送信しました！メールを確認してください"); }
     setAuthLoading(false);
   };
 
@@ -602,10 +602,10 @@ export default function DepositSection() {
     return (
       <div className="w-full max-w-md mx-auto bg-white p-8 mt-20 border-2 border-black font-sans text-center">
         <h1 className="text-3xl font-black mb-2 text-black">Web3 Wallet</h1>
-        <p className="text-sm text-gray-500 mb-8 font-bold">Login to Access Your Grow Box</p>
+        <p className="text-sm text-gray-500 mb-8 font-bold">まずはウォレットにログインしましょう</p>
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 border-2 border-black focus:outline-none font-bold" required />
-          <button type="submit" disabled={authLoading} className="w-full h-12 bg-black text-white font-extrabold hover:bg-gray-800 transition-colors disabled:opacity-50"> {authLoading ? "Sending Link..." : "Send Magic Link"} </button>
+          <input type="email" placeholder="メールアドレスを入力" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 border-2 border-black focus:outline-none font-bold" required />
+          <button type="submit" disabled={authLoading} className="w-full h-12 bg-black text-white font-extrabold hover:bg-gray-800 transition-colors disabled:opacity-50"> {authLoading ? "リンクを送信中..." : "ログインリンクを送信する"} </button>
         </form>
       </div>
     );
