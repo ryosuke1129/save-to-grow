@@ -101,7 +101,8 @@ export default function DepositSection() {
   
   const [isInitialized, setIsInitialized] = useState(false);
   
-  const [amountInput, setAmountInput] = useState<string>("1.0");
+  const [amountInput, setAmountInput] = useState<string>("");
+  const [transferAmountInput, setTransferAmountInput] = useState<string>("");
   const [recipientAddress, setRecipientAddress] = useState<string>("");
 
   const [vaultHistory, setVaultHistory] = useState<VaultRecord[]>([]);
@@ -532,7 +533,7 @@ export default function DepositSection() {
 
   const transfer = async () => {
     if (!myWallet) return;
-    const val = parseFloat(amountInput);
+    const val = parseFloat(transferAmountInput);
     if (isNaN(val) || val <= 0) { alert("有効な金額を入力してください"); return; }
     const estimatedFee = 0.000005; 
     if (walletBalance < val + estimatedFee) { alert(`残高不足です。`); return; }
@@ -669,7 +670,7 @@ export default function DepositSection() {
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="relative w-full mb-2">
-                                <input type="number" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-14 pl-4 pr-12 text-xl font-bold border-2 border-black focus:outline-none transition-colors font-mono" placeholder="1.0"/>
+                                <input type="number" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-14 pl-4 pr-12 text-xl font-bold border-2 border-black focus:outline-none transition-colors font-mono" placeholder="0"/>
                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">SOL</span>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -720,17 +721,21 @@ export default function DepositSection() {
                                     className="w-full h-full object-contain" 
                                 />
                             </div>
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">My Grow Box NFT</p>
+                            <p className="text-xs text-black font-bold uppercase tracking-widest">My Grow Box NFT</p>
                             {/* 発行済みNFTのアドレス表示 */}
                             {nftMintAddress && <p className="text-[10px] font-mono text-gray-400 mt-2">Mint: {nftMintAddress}</p>}
                         </div>
 
-                        <div className="text-center w-full bg-white border-2 border-black p-4 mb-6">
-                            <div className="flex justify-between items-center mb-2 px-1">
-                                <p className="text-xs font-black font-bold uppercase tracking-[0.1em]">リワード</p>
-                                <button onClick={handleResetRewards} disabled={actionLoading} className="text-[10px] font-bold border border-black px-2 py-0.5 hover:bg-black hover:text-white transition-colors">リセット</button>
+                        <div className="w-full flex justify-between items-end mb-2">
+                            <p className="text-xs font-black font-bold uppercase tracking-[0.1em]">リワード</p>
+                            {/* <button onClick={handleResetRewards} disabled={actionLoading} className="text-[10px] font-bold border border-black px-2 py-0.5 hover:bg-black hover:text-white transition-colors">リセット</button> */}
+                        </div>
+
+                        <div className="text-center w-full bg-white border-2 border-black p-6 mb-6">
+                            <div className="flex items-baseline justify-center">
+                                <span className="text-3xl font-black tracking-tighter text-black leading-none font-mono">{animatedReward.toFixed(2)}</span>
+                                <span className="text-sm font-bold ml-1 text-gray-500">Points</span>
                             </div>
-                            <div className="flex items-baseline justify-center"><span className="text-3xl font-black tracking-tighter text-black leading-none font-mono">{animatedReward.toFixed(2)}</span><span className="text-sm font-bold ml-1 text-gray-500">Points</span></div>
                         </div>
                         
                         <p className="text-xs text-gray-400 text-center leading-relaxed">
@@ -745,28 +750,57 @@ export default function DepositSection() {
         {/* === Tab 3: Transfer === */}
         {activeTab === 'transfer' && (
             <div className="flex flex-col gap-8">
-                {/* Transfer機能の実装 (省略なしで全て含む) */}
-                <div className="flex flex-col gap-6">
-                    <div>
-                        <p className="text-xs font-black font-bold uppercase mb-2">送金金額</p>
-                        <div className="relative w-full">
-                            <input type="number" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-16 pl-4 pr-16 text-3xl font-black border-2 border-black focus:outline-none font-mono tracking-tight" placeholder="1.0" />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 font-black text-xl">SOL</span>
-                        </div>
-                    </div>
-                    <div className="bg-white border-2 border-black p-6">
-                        <p className="text-xs font-black font-bold uppercase mb-4">WALLETから送金</p>
-                        <div className="flex gap-2">
-                            <input type="text" value={recipientAddress} onChange={(e) => setRecipientAddress(e.target.value)} className="flex-1 h-12 pl-4 text-sm font-mono border border-black focus:outline-none bg-gray-50" placeholder="送信先アドレス (Recipient Address)" />
-                            <button onClick={transfer} disabled={actionLoading || walletBalance < parseFloat(amountInput) || !recipientAddress} className="h-12 px-6 bg-gray-400 text-white text-sm font-bold hover:bg-black transition-colors disabled:opacity-30">送金</button>
+                {/* 送金フォーム (1つの枠内にまとめる) */}
+                <div>
+                  {/* 見出しを枠の外へ */}
+                  <p className="text-xs font-black font-bold uppercase mb-2">WALLETから送金</p>
+                  
+                  {/* 枠線の中身 */}
+                  <div className="bg-white border-2 border-black p-6">
+                      <div className="flex flex-col gap-5">
+                          {/* 金額入力欄 */}
+                          <div>
+                              <p className="text-[10px] font-bold text-black mb-1">送金金額</p>
+                              <div className="relative w-full">
+                                  <input 
+                                      type="number" 
+                                      value={transferAmountInput} 
+                                      onChange={(e) => setTransferAmountInput(e.target.value)} 
+                                      className="w-full h-14 pl-4 pr-16 text-2xl font-black border-2 border-black focus:outline-none font-mono tracking-tight" 
+                                      placeholder="0" 
+                                  />
+                                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-black text-lg">SOL</span>
+                              </div>
+                          </div>
+
+                          {/* アドレス入力 & 送信ボタン */}
+                          <div>
+                              <p className="text-[10px] font-bold text-black mb-1">送金先アドレス</p>
+                              <div className="flex flex-col md:flex-row gap-3">
+                                  <input 
+                                      type="text" 
+                                      value={recipientAddress} 
+                                      onChange={(e) => setRecipientAddress(e.target.value)} 
+                                      className="flex-1 h-12 pl-4 text-sm font-mono border-2 border-black focus:outline-none bg-gray-50" 
+                                      placeholder="ウォレットアドレスを入力" 
+                                  />
+                                  <button 
+                                      onClick={transfer} 
+                                      disabled={actionLoading || walletBalance < parseFloat(transferAmountInput) || !recipientAddress} 
+                                      className="h-12 px-8 bg-black text-white text-sm font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap"
+                                  >
+                                      送金
+                                  </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                {/* 履歴エリア (ここは変更なし) */}
                 <div className="flex flex-col h-[400px]">
                     <div className="flex justify-between items-end mb-2">
                         <p className="text-xs font-black font-bold uppercase tracking-wider">SOL 送金履歴</p>
-                        <button onClick={() => session && fetchTransferHistory(session.user.id)} className="text-[10px] font-bold underline text-gray-400 hover:text-black">更新</button>
                     </div>
                     <div className="flex-1 overflow-y-auto bg-white border-2 border-black p-2 space-y-2">
                         {transferHistory.length === 0 ? (
