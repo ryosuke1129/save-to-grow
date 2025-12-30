@@ -527,17 +527,17 @@ export default function DepositSection() {
                           </div>
 
                           <div>
-                              <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
-                              <div className="grid grid-cols-3 gap-2 mb-6">
-                                  {[1, 12, 24].map((h) => (
-                                      <button 
-                                          key={h}
-                                          onClick={() => setLockDuration(h)}
-                                          className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-blackhover:text-black'}`}
-                                      >
-                                          {h}時間
-                                      </button>
-                                  ))}
+                            <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
+                            <div className="grid grid-cols-3 gap-2 mb-6">
+                                {[1, 12, 24].map((h) => (
+                                    <button 
+                                        key={h}
+                                        onClick={() => setLockDuration(h)}
+                                        className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-blackhover:text-black'}`}
+                                    >
+                                        {h}時間
+                                    </button>
+                                ))}
                             </div>
 
                             <button 
