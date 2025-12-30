@@ -358,7 +358,8 @@ export default function DepositSection() {
 
         alert(`ロック解除成功！ リワード: +${data.reward} SOL を受け取りました`);
         fetchLocks(session.user.id);
-        fetchVault(); // 残高更新
+        fetchVault();
+        fetchWalletBalance();
     } catch (e: any) {
         alert(e.message);
     } finally {
@@ -528,14 +529,19 @@ export default function DepositSection() {
 
                           <div>
                             <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
-                            <div className="grid grid-cols-3 gap-2 mb-6">
-                                {[1, 12, 24].map((h) => (
+                            <div className="grid grid-cols-4 gap-2 mb-6">
+                                {[
+                                    { label: '5分', value: 5 / 60 }, // 5分 = 5/60 時間
+                                    { label: '1時間', value: 1 },
+                                    { label: '12時間', value: 12 },
+                                    { label: '24時間', value: 24 }
+                                ].map((opt) => (
                                     <button 
-                                        key={h}
-                                        onClick={() => setLockDuration(h)}
-                                        className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-blackhover:text-black'}`}
+                                        key={opt.label}
+                                        onClick={() => setLockDuration(opt.value)}
+                                        className={`h-10 text-sm font-bold border-2 border-black transition-all ${Math.abs(lockDuration - opt.value) < 0.001 ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-50'}`}
                                     >
-                                        {h}時間
+                                        {opt.label}
                                     </button>
                                 ))}
                             </div>
@@ -567,7 +573,11 @@ export default function DepositSection() {
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div>
                                                         <span className="text-2xl font-black font-mono block">{lock.amount.toFixed(2)} <span className="text-sm text-gray-400">SOL</span></span>
-                                                        <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1 py-0.5 rounded">{lock.duration_hours}時間ロック</span>
+                                                        <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1 py-0.5 rounded">
+                                                            {lock.duration_hours < 1 
+                                                                ? `${Math.round(lock.duration_hours * 60)}分ロック` 
+                                                                : `${lock.duration_hours}時間ロック`}
+                                                        </span>
                                                     </div>
                                                     <div className="text-right">
                                                         <span className="text-[10px] font-bold text-gray-400 block">獲得予定SOL</span>

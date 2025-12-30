@@ -86,14 +86,6 @@ export async function POST(request: Request) {
       // 4. ステータス更新 (解除済みにする)
       await supabase.from('box_locks').update({ status: 'claimed' }).eq('id', lockId);
 
-      // 5. 履歴に記録
-      await supabase.from('transaction_history').insert([{
-        user_id: userId,
-        type: 'Reward', // 'Reward'がない場合は 'Deposit' 等
-        amount: lockData.reward_amount,
-        gas: 0
-      }]);
-
       return NextResponse.json({ success: true, reward: lockData.reward_amount });
     }
 
