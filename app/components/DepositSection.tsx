@@ -104,6 +104,7 @@ export default function DepositSection() {
   const [amountInput, setAmountInput] = useState<string>("");
   const [transferAmountInput, setTransferAmountInput] = useState<string>("");
   const [recipientAddress, setRecipientAddress] = useState<string>("");
+  const [isCopied, setIsCopied] = useState(false);
 
   const [vaultHistory, setVaultHistory] = useState<VaultRecord[]>([]);
   const [transferHistory, setTransferHistory] = useState<TransferRecord[]>([]);
@@ -487,6 +488,7 @@ export default function DepositSection() {
       const gas = (diff - inputLamports) / LAMPORTS_PER_SOL;
       await addVaultHistory("Deposit", val, gas); 
       await fetchVault(); await fetchWalletBalance();
+      setAmountInput("");
 
       // 2. ★ NFT更新 (新残高に基づいて)
       // fetchVaultが完了してbalanceステートが更新されるのを待つか、計算値を使う
@@ -521,6 +523,7 @@ export default function DepositSection() {
       const gas = (expectedReceived - actualReceived) / LAMPORTS_PER_SOL;
       await addVaultHistory("Withdraw", val, gas); 
       await fetchVault(); await fetchWalletBalance();
+      setAmountInput("");
 
       // 2. ★ NFT更新
       const currentVaultSol = (Number(balance) - expectedReceived) / LAMPORTS_PER_SOL;
@@ -547,7 +550,8 @@ export default function DepositSection() {
       await connection.confirmTransaction(signature, "confirmed");
       alert(`送金完了: ${val} SOL`);
       await addTransferHistory(recipientAddress, val, estimatedFee);
-      setRecipientAddress(""); 
+      setRecipientAddress("");
+      setTransferAmountInput("");
       await fetchWalletBalance();
     } catch (e: any) { 
         console.error(e);
@@ -560,22 +564,34 @@ export default function DepositSection() {
   const copyAddress = async () => {
     if (!myWallet) return;
     const address = myWallet.publicKey.toString();
+    let success = false;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        try { await navigator.clipboard.writeText(address); return; } catch (err) {}
+        try { 
+            await navigator.clipboard.writeText(address); 
+            success = true;
+        } catch (err) {}
+    } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = address;
+        textArea.style.position = "fixed"; textArea.style.left = "0"; textArea.style.top = "0"; textArea.style.opacity = "0"; textArea.style.pointerEvents = "none"; 
+        document.body.appendChild(textArea);
+        textArea.focus(); textArea.select();
+        try { document.execCommand('copy'); success = true; } catch (e) {} finally { document.body.removeChild(textArea); }
     }
-    const textArea = document.createElement("textarea");
-    textArea.value = address;
-    textArea.style.position = "fixed"; textArea.style.left = "0"; textArea.style.top = "0"; textArea.style.opacity = "0"; textArea.style.pointerEvents = "none"; 
-    document.body.appendChild(textArea);
-    textArea.focus(); textArea.select();
-    try { document.execCommand('copy'); alert("コピーしました"); } catch (e) { alert("コピーに失敗しました。"); } finally { document.body.removeChild(textArea); }
+
+    if (success) {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 1000);
+    } else {
+        alert("コピーに失敗しました。");
+    }
   };
 
-  const handleResetRewards = async () => { 
-      setActionLoading(true); 
-      await fetchVault(); 
-      setActionLoading(false); 
-  };
+  // const handleResetRewards = async () => { 
+  //     setActionLoading(true); 
+  //     await fetchVault(); 
+  //     setActionLoading(false); 
+  // };
 
   const solVaultBalance = useMemo(() => Number(balance) / LAMPORTS_PER_SOL, [balance]);
   const rewardPoints = useMemo(() => Number(rewardBalance) / LAMPORTS_PER_SOL, [rewardBalance]);
@@ -640,8 +656,8 @@ export default function DepositSection() {
 
       <div className="w-full bg-white border-2 border-black p-5 mb-8 max-w-3xl mx-auto">
         <div className="flex justify-between items-end mb-2"><p className="text-xs font-black font-bold uppercase">WALLET残高</p><div className="text-right"><p className="text-2xl font-mono font-bold text-black">{animatedWalletBalance.toFixed(6)} <span className="text-sm text-gray-400">SOL</span></p></div></div>
-        <button onClick={copyAddress} className="w-full text-left bg-white border border-black hover:bg-gray-50 py-2 px-3 font-mono text-xs text-gray-500 transition-colors flex justify-between items-center group">
-            <span>{shortAddress}</span><span className="text-black opacity-0 group-hover:opacity-100 font-bold">COPY</span>
+        <button onClick={copyAddress} className={`w-full text-left border border-black py-2 px-3 font-mono text-xs text-gray-500 flex justify-between items-center group transition-colors duration-200 ${isCopied ? 'bg-[#EEFF77]' : 'bg-white hover:bg-gray-50'}`}>
+            <span>{shortAddress}</span><span className={`text-black font-bold ${isCopied ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>{isCopied ? 'COPIED!' : 'COPY'}</span>
         </button>
       </div>
 
