@@ -389,7 +389,7 @@ export default function DepositSection() {
 
       <div className="w-full bg-white border-2 border-black p-5 mb-8 max-w-3xl mx-auto">
         <div className="flex flex-col mb-2">
-            <p className="text-xs font-black font-bold mb-1 text-gray-500 uppercase tracking-wider text-left">Wallet残高</p>
+            <p className="text-xs font-black font-bold mb-1 text-gray-500 tracking-wider text-left">Wallet残高</p>
             <p className="text-4xl font-mono font-black text-black tracking-tighter text-right">{animatedWalletBalance.toFixed(6)} <span className="text-lg text-gray-400 font-bold">SOL</span></p>
         </div>
         <button onClick={copyAddress} className={`w-full text-left border border-black py-2 px-3 font-mono text-xs text-gray-500 flex justify-between items-center group transition-colors duration-200 ${isCopied ? 'bg-[#EEFF77]' : 'bg-white hover:bg-gray-50'}`}>
