@@ -14,8 +14,16 @@ import { createNft, updateV1, fetchMetadataFromSeeds, mplTokenMetadata } from "@
 import { fromWeb3JsKeypair, fromWeb3JsPublicKey } from "@metaplex-foundation/umi-web3js-adapters";
 import { sha256 } from 'js-sha256';
 
-const PROGRAM_ID = new PublicKey("5Y7L91KtvUumZo5fXLXtbCfpHRNYsLmV6kwsSBRUsvxT");
-const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+// --- SolanaネットワークとプログラムIDの設定 ---
+const NETWORK_URL = process.env.NEXT_PUBLIC_SOLANA_NETWORK!;
+const PROGRAM_ID_STRING = process.env.NEXT_PUBLIC_PROGRAM_ID!;
+
+if (!NETWORK_URL || !PROGRAM_ID_STRING) {
+  throw new Error("Solana Network URL or Program ID is missing.");
+}
+
+const PROGRAM_ID = new PublicKey(PROGRAM_ID_STRING);
+const connection = new Connection(NETWORK_URL, "confirmed");
 
 // ★ NFTのメタデータURI設定 (実運用時はIPFS等のJSON URLに置き換えてください)
 // 各JSONには "image": "GIF画像のURL" が記述されている必要があります
@@ -351,7 +359,7 @@ export default function DepositSection() {
   
   // Umiインスタンスの作成
   const createUmiInstance = (wallet: Keypair) => {
-    const umi = createUmi("https://api.devnet.solana.com")
+    const umi = createUmi(NETWORK_URL)
       .use(mplTokenMetadata());
     
     // Web3.jsのKeypairをUmiのSignerに変換して登録
