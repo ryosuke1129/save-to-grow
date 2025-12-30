@@ -545,7 +545,7 @@ export default function DepositSection() {
                             <button 
                                 onClick={handleLock} 
                                 disabled={actionLoading || availableToWithdraw <= 0}
-                                className="w-full h-14 bg-black text-white border-2 border-black font-black text-lg hover:brightness-95 transition-all disabled:opacity-50 disabled:bg-gray-200"
+                                className="w-full h-14 bg-black text-white border-2 border-black font-black hover:brightness-95 transition-all disabled:opacity-50 disabled:bg-gray-200"
                             >
                                 ロックする
                             </button>
