@@ -503,7 +503,7 @@ export default function DepositSection() {
                         {/* ロック入力エリア */}
                         <div className="w-full bg-white border-2 border-black p-6">
                           {/* タイトル削除 & 利率を枠内に移動 */}
-                          <div className="flex justify-between items-start mb-6">
+                          {/* <div className="flex justify-between items-start mb-6">
                               <p className="text-xs text-gray-500 leading-relaxed">
                                   Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
                                   <span className="font-bold text-red-500">ロック中は出金できません。</span>
@@ -511,7 +511,7 @@ export default function DepositSection() {
                               <span className="bg-[#EEFF77] text-black text-[10px] font-black px-2 py-1 whitespace-nowrap ml-2">
                                   利率 5.0%
                               </span>
-                          </div>
+                          </div> */}
 
                           <div className="mb-4">
                               <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能: {availableToWithdraw.toFixed(2)} SOL)</p>
@@ -544,6 +544,15 @@ export default function DepositSection() {
                                         {opt.label}
                                     </button>
                                 ))}
+                            </div>
+                            <div className="flex justify-between items-start mb-6">
+                                <p className="text-xs text-gray-500 leading-relaxed">
+                                    Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
+                                    <span className="font-bold text-red-500">ロック中は出金できません。</span>
+                                </p>
+                                <span className="bg-[#EEFF77] text-black text-[10px] font-black px-2 py-1 whitespace-nowrap ml-2">
+                                    利率 5.0%
+                                </span>
                             </div>
 
                             <button 
