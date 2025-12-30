@@ -778,6 +778,7 @@ export default function DepositSection() {
                           <div>
                               <p className="text-[10px] font-bold text-black mb-1">送金金額</p>
                               <div className="relative w-full">
+                                  {/* ここは元々 h-14 です */}
                                   <input 
                                       type="number" 
                                       value={transferAmountInput} 
@@ -797,12 +798,14 @@ export default function DepositSection() {
                                       type="text" 
                                       value={recipientAddress} 
                                       onChange={(e) => setRecipientAddress(e.target.value)} 
+                                      /* ★ここを h-14 に変更（背景も白に合わせて統一感を出すなら bg-white に変更してもOK） */
                                       className="flex-1 h-14 pl-4 text-sm font-mono border-2 border-black focus:outline-none bg-gray-50" 
                                       placeholder="ウォレットアドレスを入力" 
                                   />
                                   <button 
                                       onClick={transfer} 
-                                      disabled={actionLoading || !transferAmountInput || !recipientAddress || parseFloat(transferAmountInput) <= 0 || walletBalance < parseFloat(transferAmountInput)}
+                                      disabled={actionLoading || !transferAmountInput || !recipientAddress || parseFloat(transferAmountInput) <= 0 || walletBalance < parseFloat(transferAmountInput)} 
+                                      /* ★ここも h-14 に変更 */
                                       className="h-14 px-8 bg-black text-white text-sm font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap"
                                   >
                                       送金
@@ -813,7 +816,7 @@ export default function DepositSection() {
                     </div>
                 </div>
 
-                {/* 履歴エリア (ここは変更なし) */}
+                {/* 履歴エリア */}
                 <div className="flex flex-col h-[400px]">
                     <div className="flex justify-between items-end mb-2">
                         <p className="text-xs font-black font-bold uppercase tracking-wider">SOL 送金履歴</p>
