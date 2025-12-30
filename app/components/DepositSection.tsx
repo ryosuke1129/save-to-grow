@@ -485,7 +485,7 @@ export default function DepositSection() {
       // 注意: balanceは文字列のLamports
       const currentVaultSol = (Number(balance) + inputLamports) / LAMPORTS_PER_SOL;
       if (nftMintAddress) {
-          await updateNftMetadata(myWallet, nftMintAddress, currentVaultSol);
+          updateNftMetadata(myWallet, nftMintAddress, currentVaultSol);
       }
 
     } catch (e: any) { console.error(e); alert("入金エラー"); } finally { setActionLoading(false); }
@@ -516,7 +516,7 @@ export default function DepositSection() {
       // 2. ★ NFT更新
       const currentVaultSol = (Number(balance) - expectedReceived) / LAMPORTS_PER_SOL;
       if (nftMintAddress) {
-          await updateNftMetadata(myWallet, nftMintAddress, currentVaultSol > 0 ? currentVaultSol : 0);
+          updateNftMetadata(myWallet, nftMintAddress, currentVaultSol > 0 ? currentVaultSol : 0);
       }
 
     } catch (e: any) { console.error(e); alert("出金エラー"); } finally { setActionLoading(false); }
