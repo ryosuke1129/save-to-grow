@@ -109,6 +109,8 @@ export default function DepositSection() {
   const [vaultHistory, setVaultHistory] = useState<VaultRecord[]>([]);
   const [transferHistory, setTransferHistory] = useState<TransferRecord[]>([]);
 
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+
   // --- Effects ---
   useEffect(() => {
     setMounted(true);
@@ -171,6 +173,11 @@ export default function DepositSection() {
   }, [myWallet]);
 
   // --- Logic Functions ---
+  const triggerHighlight = (id: string) => {
+    setHighlightId(id);
+    setTimeout(() => setHighlightId(null), 1200);
+  };
+
   const fetchVaultHistory = async (userId: string) => {
       const { data } = await supabase.from('transaction_history').select('*').eq('user_id', userId).order('created_at', { ascending: false });
       if (data) {
@@ -201,32 +208,42 @@ export default function DepositSection() {
 
   const addVaultHistory = async (type: TxType, amount: number, gas: number) => {
       if (!session) return;
-      await supabase.from('transaction_history').insert([{ user_id: session.user.id, type, amount, gas }]);
+      const { data } = await supabase
+        .from('transaction_history')
+        .insert([{ user_id: session.user.id, type, amount, gas }])
+        .select();
+
+      if (data && data[0]) {
+        triggerHighlight(data[0].id);
+      }
       fetchVaultHistory(session.user.id);
   };
 
   const addTransferHistory = async (destination: string, amount: number, fee: number) => {
     if (!session) return;
 
-    // 修正: 分割代入で error を受け取る
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('transfer_history')
         .insert([{ 
             user_id: session.user.id, 
             destination, 
             amount, 
             fee 
-        }]);
+        }])
+        .select(); // .select() を追加
 
-    // エラーがあればログに出してアラートを表示
     if (error) {
         console.error("履歴保存エラー:", error);
         alert(`履歴の保存に失敗しました: ${error.message}`);
         return;
     }
 
+    if (data && data[0]) {
+        triggerHighlight(data[0].id);
+    }
+
     fetchTransferHistory(session.user.id);
-};
+  };
 
   const checkWalletExistence = async (userId: string) => {
     setLoading(true);
@@ -548,7 +565,6 @@ export default function DepositSection() {
       const transaction = new Transaction().add(SystemProgram.transfer({ fromPubkey: myWallet.publicKey, toPubkey: recipientPubkey, lamports: Math.floor(val * LAMPORTS_PER_SOL), }));
       const signature = await connection.sendTransaction(transaction, [myWallet]);
       await connection.confirmTransaction(signature, "confirmed");
-      alert(`送金完了: ${val} SOL`);
       await addTransferHistory(recipientAddress, val, estimatedFee);
       setRecipientAddress("");
       setTransferAmountInput("");
@@ -581,7 +597,7 @@ export default function DepositSection() {
 
     if (success) {
         setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 1000);
+        setTimeout(() => setIsCopied(false), 1200);
     } else {
         alert("コピーに失敗しました。");
     }
@@ -701,7 +717,10 @@ export default function DepositSection() {
                                     <div className="h-full flex items-center justify-center text-gray-300 font-bold text-sm">履歴はありません</div>
                                 ) : (
                                     vaultHistory.map((record) => (
-                                        <div key={record.id} className="bg-white p-3 border border-gray-200 flex justify-between items-center hover:border-black transition-colors">
+                                        <div 
+                                            key={record.id} 
+                                            className={`p-3 border border-gray-200 flex justify-between items-center hover:border-black transition-colors duration-500 ${record.id === highlightId ? 'bg-[#EEFF77]' : 'bg-white'}`}
+                                        >
                                             <div className="flex items-center gap-3">
                                                 <div className={`w-8 h-8 flex items-center justify-center text-[10px] font-bold border border-black ${record.type === "Deposit" ? "bg-black text-white" : record.type === "Withdraw" ? "bg-white text-black" : "bg-gray-100 text-black"}`}>
                                                     {record.type === "Deposit" ? "IN" : record.type === "Withdraw" ? "OUT" : "INI"}
@@ -826,7 +845,10 @@ export default function DepositSection() {
                             <div className="h-full flex items-center justify-center text-gray-300 font-bold text-sm">送信履歴はありません</div>
                         ) : (
                             transferHistory.map((record) => (
-                                <div key={record.id} className="bg-white p-4 border border-gray-200 hover:border-black transition-colors">
+                                <div 
+                                    key={record.id} 
+                                    className={`p-4 border border-gray-200 hover:border-black transition-colors duration-500 ${record.id === highlightId ? 'bg-[#EEFF77]' : 'bg-white'}`}
+                                >
                                     <div className="flex justify-between items-center mb-1">
                                         <div className="flex items-center gap-2"><span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5">SEND</span><span className="text-xs font-mono text-gray-400">{record.date}</span></div>
                                         <span className="font-mono font-bold text-xl text-black text-red-500">-{record.amount} <span className="text-sm text-gray-400">SOL</span></span>
