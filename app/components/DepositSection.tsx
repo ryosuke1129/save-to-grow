@@ -526,9 +526,9 @@ export default function DepositSection() {
                               </div>
                           </div>
 
-                          <div className="mb-6">
+                          <div>
                               <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
-                              <div className="grid grid-cols-3 gap-2">
+                              <div className="grid grid-cols-3 gap-2 mb-6">
                                   {[1, 12, 24].map((h) => (
                                       <button 
                                           key={h}
