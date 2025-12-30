@@ -500,7 +500,7 @@ export default function DepositSection() {
                 ) : (
                     <>
                         {/* ロック入力エリア */}
-                        <div className="flex w-full bg-white border-2 border-black p-6">
+                        <div className="w-full bg-white border-2 border-black p-6">
                           {/* タイトル削除 & 利率を枠内に移動 */}
                           <div className="flex justify-between items-start mb-6">
                               <p className="text-xs text-gray-500 leading-relaxed">
@@ -528,7 +528,7 @@ export default function DepositSection() {
 
                           <div className="mb-6">
                               <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
-                              <div className="grid grid-cols-3 gap-2">
+                              <div className="grid grid-cols-3 gap-2 mb-6">
                                   {[1, 12, 24].map((h) => (
                                       <button 
                                           key={h}
