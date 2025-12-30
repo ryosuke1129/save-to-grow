@@ -452,7 +452,7 @@ export default function DepositSection() {
                             {/* ★ロック中金額の表示を追加 */}
                             {totalLockedAmount > 0 && (
                                 <p className="text-xs font-bold text-gray-400 mt-2">
-                                    (Lock中: {totalLockedAmount.toFixed(4)} SOL / 出金可能: {availableToWithdraw.toFixed(4)} SOL)
+                                    (ロック中: {totalLockedAmount.toFixed(2)} SOL / 出金可能: {availableToWithdraw.toFixed(2)} SOL)
                                 </p>
                             )}
                         </div>
@@ -512,7 +512,7 @@ export default function DepositSection() {
                             </p>
 
                             <div className="mb-4">
-                                <p className="text-[10px] font-bold mb-1">ロックする金額 (Available: {availableToWithdraw.toFixed(4)} SOL)</p>
+                                <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能額: {availableToWithdraw.toFixed(4)} SOL)</p>
                                 <div className="relative w-full">
                                     <input 
                                         type="number" 
@@ -534,7 +534,7 @@ export default function DepositSection() {
                                             onClick={() => setLockDuration(h)}
                                             className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-gray-400 hover:text-black'}`}
                                         >
-                                            {h}時間{h > 1 && 's'}
+                                            {h}時間
                                         </button>
                                     ))}
                                 </div>
