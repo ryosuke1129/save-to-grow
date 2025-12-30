@@ -786,7 +786,7 @@ export default function DepositSection() {
                                   />
                                   <button 
                                       onClick={transfer} 
-                                      disabled={actionLoading || walletBalance < parseFloat(transferAmountInput) || !recipientAddress} 
+                                      disabled={actionLoading || !transferAmountInput || !recipientAddress || parseFloat(transferAmountInput) <= 0 || walletBalance < parseFloat(transferAmountInput)}
                                       className="h-12 px-8 bg-black text-white text-sm font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap"
                                   >
                                       送金
