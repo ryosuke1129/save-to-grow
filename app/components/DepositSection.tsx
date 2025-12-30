@@ -399,123 +399,37 @@ export default function DepositSection() {
 
       {/* タブ切り替え: LockBoxを左に追加 */}
       <div className="flex w-full max-w-2xl mx-auto mb-8 border-b-2 border-gray-100 gap-1 md:gap-8 overflow-x-auto">
-        <button onClick={() => setActiveTab('lock')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'lock' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>LockBox</button>
-        <button onClick={() => setActiveTab('box')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'box' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Box</button>
         <button onClick={() => setActiveTab('nft')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'nft' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>NFT</button>
+        <button onClick={() => setActiveTab('box')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'box' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>GrowBox</button>
+        <button onClick={() => setActiveTab('lock')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'lock' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>LockSOL</button>
         <button onClick={() => setActiveTab('transfer')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'transfer' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>送金</button>
       </div>
 
       <div className="w-full max-w-3xl mx-auto">
-        
-        {/* === Tab 1: LockBox (New!) === */}
-        {activeTab === 'lock' && (
-            <div className="flex flex-col gap-6">
-                 {!isInitialized ? (
-                     <div className="flex flex-col items-center justify-center min-h-[300px] border-2 border-dashed border-gray-300 p-6 rounded">
-                        <p className="text-gray-400 font-bold mb-4">まずはGrow Boxを開設して入金してください</p>
-                        <button onClick={() => setActiveTab('box')} className="text-sm font-bold border-b-2 border-black pb-1">Boxタブへ移動</button>
-                     </div>
+
+        {/* === Tab 1: NFT (既存) === */}
+        {activeTab === 'nft' && (
+             /* ... 既存のNFTタブの中身 (変更なし) ... */
+             <div className="flex flex-col items-center">
+                {!isInitialized ? (
+                    <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+                        <p className="text-gray-400 font-bold mb-4">NFTを発行するには<br/>Grow Boxを開設してください</p>
+                        <button onClick={() => setActiveTab('box')} className="text-sm border-b-2 border-black pb-1 font-bold">Boxタブへ移動</button>
+                    </div>
                 ) : (
                     <>
-                        {/* ロック入力エリア */}
-                        <div className="w-full bg-[#FAFAFA] border-2 border-black p-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <p className="text-xs font-black font-bold uppercase tracking-wider">Lock SOL (Gas Free)</p>
-                                <span className="bg-black text-white text-[10px] font-bold px-2 py-1">APY 5%</span>
+                        <div className="mb-6 relative group cursor-default text-center w-full border-2 border-black p-8">
+                            <div className="w-[200px] h-[100px] mx-auto flex items-center justify-center overflow-hidden mb-4">
+                                <img src={gifData.src} alt={gifData.alt} className="w-full h-full object-contain" />
                             </div>
-                            
-                            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                                Grow Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
-                                <span className="font-bold text-red-500">ロック中は出金できません。</span>
-                            </p>
-
-                            <div className="mb-4">
-                                <p className="text-[10px] font-bold mb-1">ロックする金額 (Available: {availableToWithdraw.toFixed(4)} SOL)</p>
-                                <div className="relative w-full">
-                                    <input 
-                                        type="number" 
-                                        value={lockAmountInput} 
-                                        onChange={(e) => setLockAmountInput(e.target.value)} 
-                                        className="w-full h-12 pl-4 pr-12 text-lg font-bold border-2 border-black focus:outline-none font-mono" 
-                                        placeholder="0" 
-                                    />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">SOL</span>
-                                </div>
-                            </div>
-
-                            <div className="mb-6">
-                                <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[1, 12, 24].map((h) => (
-                                        <button 
-                                            key={h}
-                                            onClick={() => setLockDuration(h)}
-                                            className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-gray-400 hover:text-black'}`}
-                                        >
-                                            {h} Hour{h > 1 && 's'}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <button 
-                                onClick={handleLock} 
-                                disabled={actionLoading || availableToWithdraw <= 0}
-                                className="w-full h-14 bg-[#EEFF77] text-black border-2 border-black font-black text-lg hover:brightness-95 transition-all disabled:opacity-50 disabled:bg-gray-200"
-                            >
-                                LOCK NOW
-                            </button>
+                            <p className="text-xs text-black font-bold tracking-widest">My Grow Box NFT</p>
+                            {nftMintAddress && <p className="text-[10px] font-mono text-gray-400 mt-2">Mint: {nftMintAddress}</p>}
                         </div>
-
-                        {/* アクティブなロック一覧 */}
-                        <div className="w-full mt-4">
-                            <p className="text-xs font-black font-bold mb-2 tracking-wider">Your Active Locks</p>
-                            <div className="space-y-3">
-                                {activeLocks.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-300 font-bold text-sm bg-white border border-dashed border-gray-300">ロック中のSOLはありません</div>
-                                ) : (
-                                    activeLocks.map(lock => {
-                                        const now = new Date();
-                                        const ends = new Date(lock.ends_at);
-                                        const isUnlockable = now >= ends;
-                                        
-                                        return (
-                                            <div key={lock.id} className="bg-white border-2 border-black p-4 relative overflow-hidden">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
-                                                        <span className="text-2xl font-black font-mono block">{lock.amount} <span className="text-sm text-gray-400">SOL</span></span>
-                                                        <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1 py-0.5 rounded">{lock.duration_hours} Hours Lock</span>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className="text-[10px] font-bold text-gray-400 block">Reward</span>
-                                                        <span className="text-sm font-mono font-bold text-[#EECB00]">+{lock.reward_amount.toFixed(6)}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
-                                                    <div className="text-[10px] font-mono text-gray-400">
-                                                        End: {ends.toLocaleString()}
-                                                    </div>
-                                                    {isUnlockable ? (
-                                                        <button 
-                                                            onClick={() => handleUnlock(lock.id)} 
-                                                            className="bg-black text-white px-4 py-2 text-xs font-bold hover:bg-gray-800 animate-pulse"
-                                                        >
-                                                            UNLOCK & CLAIM
-                                                        </button>
-                                                    ) : (
-                                                        <div className="flex items-center gap-1 text-gray-400">
-                                                            <span className="text-xs font-bold">LOCKED</span>
-                                                            <span className="block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
+                        <div className="w-full flex justify-between items-end mb-2"><p className="text-xs font-black font-bold tracking-[0.1em]">リワード</p></div>
+                        <div className="text-center w-full bg-white border-2 border-black p-6 mb-6">
+                            <div className="flex items-baseline justify-center"><span className="text-3xl font-black tracking-tighter text-black leading-none font-mono">{animatedReward.toFixed(2)}</span><span className="text-sm font-bold ml-1 text-gray-500">Points</span></div>
                         </div>
+                        <p className="text-xs text-gray-400 text-center leading-relaxed">このNFTはGrow Boxの残高に応じて見た目が変化します。<br/>5 SOL以上預けると"何か"に進化します。</p>
                     </>
                 )}
             </div>
@@ -575,29 +489,115 @@ export default function DepositSection() {
             </div>
         )}
 
-        {/* === Tab 3: NFT (既存) === */}
-        {activeTab === 'nft' && (
-             /* ... 既存のNFTタブの中身 (変更なし) ... */
-             <div className="flex flex-col items-center">
-                {!isInitialized ? (
-                    <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
-                        <p className="text-gray-400 font-bold mb-4">NFTを発行するには<br/>Grow Boxを開設してください</p>
-                        <button onClick={() => setActiveTab('box')} className="text-sm border-b-2 border-black pb-1 font-bold">Boxタブへ移動</button>
-                    </div>
+        {/* === Tab 3: LockSOL (New!) === */}
+        {activeTab === 'lock' && (
+            <div className="flex flex-col gap-6">
+                 {!isInitialized ? (
+                     <div className="flex flex-col items-center justify-center min-h-[300px] border-2 border-dashed border-gray-300 p-6 rounded">
+                        <p className="text-gray-400 font-bold mb-4">まずはGrow Boxを開設して入金してください</p>
+                        <button onClick={() => setActiveTab('box')} className="text-sm font-bold border-b-2 border-black pb-1">Boxタブへ移動</button>
+                     </div>
                 ) : (
                     <>
-                        <div className="mb-6 relative group cursor-default text-center w-full border-2 border-black p-8">
-                            <div className="w-[200px] h-[100px] mx-auto flex items-center justify-center overflow-hidden mb-4">
-                                <img src={gifData.src} alt={gifData.alt} className="w-full h-full object-contain" />
+                        {/* ロック入力エリア */}
+                        <div className="w-full bg-white border-2 border-black p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <p className="text-xs font-black font-bold uppercase tracking-wider">Lock SOL</p>
+                                <span className="bg-[#EEFF77] text-black text-[10px] font-bold px-2 py-1">利率 5.0%</span>
                             </div>
-                            <p className="text-xs text-black font-bold tracking-widest">My Grow Box NFT</p>
-                            {nftMintAddress && <p className="text-[10px] font-mono text-gray-400 mt-2">Mint: {nftMintAddress}</p>}
+                            
+                            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                                Grow Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
+                                <span className="font-bold text-red-500">ロック中は出金できません。</span>
+                            </p>
+
+                            <div className="mb-4">
+                                <p className="text-[10px] font-bold mb-1">ロックする金額 (Available: {availableToWithdraw.toFixed(4)} SOL)</p>
+                                <div className="relative w-full">
+                                    <input 
+                                        type="number" 
+                                        value={lockAmountInput} 
+                                        onChange={(e) => setLockAmountInput(e.target.value)} 
+                                        className="w-full h-12 pl-4 pr-12 text-lg font-bold border-2 border-black focus:outline-none font-mono" 
+                                        placeholder="0" 
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">SOL</span>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[1, 12, 24].map((h) => (
+                                        <button 
+                                            key={h}
+                                            onClick={() => setLockDuration(h)}
+                                            className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-gray-400 hover:text-black'}`}
+                                        >
+                                            {h}時間{h > 1 && 's'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={handleLock} 
+                                disabled={actionLoading || availableToWithdraw <= 0}
+                                className="w-full h-14 bg-black text-white border-2 border-black font-black text-lg hover:brightness-95 transition-all disabled:opacity-50 disabled:bg-gray-200"
+                            >
+                                ロックする
+                            </button>
                         </div>
-                        <div className="w-full flex justify-between items-end mb-2"><p className="text-xs font-black font-bold tracking-[0.1em]">リワード</p></div>
-                        <div className="text-center w-full bg-white border-2 border-black p-6 mb-6">
-                            <div className="flex items-baseline justify-center"><span className="text-3xl font-black tracking-tighter text-black leading-none font-mono">{animatedReward.toFixed(2)}</span><span className="text-sm font-bold ml-1 text-gray-500">Points</span></div>
+
+                        {/* アクティブなロック一覧 */}
+                        <div className="w-full mt-4">
+                            <p className="text-xs font-black font-bold mb-2 tracking-wider">ロック中のSOL</p>
+                            <div className="space-y-3">
+                                {activeLocks.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-300 font-bold text-sm bg-white border border-dashed border-gray-300">ロック中のSOLはありません</div>
+                                ) : (
+                                    activeLocks.map(lock => {
+                                        const now = new Date();
+                                        const ends = new Date(lock.ends_at);
+                                        const isUnlockable = now >= ends;
+                                        
+                                        return (
+                                            <div key={lock.id} className="bg-white border-2 border-black p-4 relative overflow-hidden">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <span className="text-2xl font-black font-mono block">{lock.amount} <span className="text-sm text-gray-400">SOL</span></span>
+                                                        <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1 py-0.5 rounded">{lock.duration_hours}時間ロック</span>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="text-[10px] font-bold text-gray-400 block">獲得予定SOL</span>
+                                                        <span className="text-sm font-mono font-bold bg-[#EEFF77] text-black">+{lock.reward_amount.toFixed(6)}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
+                                                    <div className="text-[10px] font-mono text-gray-400">
+                                                        ロック終了: {ends.toLocaleString()}
+                                                    </div>
+                                                    {isUnlockable ? (
+                                                        <button 
+                                                            onClick={() => handleUnlock(lock.id)} 
+                                                            className="bg-black text-white px-4 py-2 text-xs font-bold hover:bg-gray-800 animate-pulse"
+                                                        >
+                                                            ロック解除
+                                                        </button>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1 text-gray-400">
+                                                            <span className="text-xs font-bold">ロック中</span>
+                                                            <span className="block w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
-                        <p className="text-xs text-gray-400 text-center leading-relaxed">このNFTはGrow Boxの残高に応じて見た目が変化します。<br/>5 SOL以上預けると"何か"に進化します。</p>
                     </>
                 )}
             </div>
