@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ここで強制的に白にします */
+body {
+  background-color: #ffffff !important; /* !important で優先度を最強にする */
+  color: #0D0D0D !important;
+}
+
+/* ついでにボタンの色も強制指定 */
+.wallet-adapter-button-trigger {
+  background-color: #0D0D0D !important;
+  color: #EEFF77 !important;
+}
