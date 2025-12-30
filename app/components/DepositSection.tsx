@@ -273,7 +273,7 @@ export default function DepositSection() {
       try { setActionLoading(true); const preBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey)); const program = new Program(idl as any, provider) as any;
           await program.methods.deposit(new BN(Math.floor(val * LAMPORTS_PER_SOL))).accounts({ vault: vaultPda, rewardBox: rewardPda, user: myWallet.publicKey, systemProgram: SystemProgram.programId }).signers([myWallet]).rpc({ skipPreflight: true });
           const postBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey));
-          await addVaultHistory("Deposit", val, (preBalance - postBalance) / LAMPORTS_PER_SOL); await fetchVault(); await fetchWalletBalance(); setAmountInput("");
+          await addVaultHistory("Deposit", val, (preBalance - postBalance) / LAMPORTS_PER_SOL - val); await fetchVault(); await fetchWalletBalance(); setAmountInput("");
           const currentVaultSol = (Number(balance) + Math.floor(val * LAMPORTS_PER_SOL)) / LAMPORTS_PER_SOL;
           if (nftMintAddress) updateNftMetadata(myWallet, nftMintAddress, currentVaultSol);
       } catch (e) { alert("入金エラー"); } finally { setActionLoading(false); }
@@ -399,10 +399,10 @@ export default function DepositSection() {
 
       {/* タブ切り替え: LockBoxを左に追加 */}
       <div className="flex w-full max-w-2xl mx-auto mb-8 border-b-2 border-gray-100 gap-1 md:gap-8 overflow-x-auto">
-        <button onClick={() => setActiveTab('nft')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'nft' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>NFT</button>
-        <button onClick={() => setActiveTab('box')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'box' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Box</button>
-        <button onClick={() => setActiveTab('lock')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'lock' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Lock</button>
-        <button onClick={() => setActiveTab('transfer')} className={`flex-1 pb-2 text-center text-lg font-black whitespace-nowrap transition-colors ${activeTab === 'transfer' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>送金</button>
+        <button onClick={() => setActiveTab('nft')} className={`flex-1 pb-2 text-center text-lg font-bold whitespace-nowrap transition-colors ${activeTab === 'nft' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>NFT</button>
+        <button onClick={() => setActiveTab('box')} className={`flex-1 pb-2 text-center text-lg font-bold whitespace-nowrap transition-colors ${activeTab === 'box' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Box</button>
+        <button onClick={() => setActiveTab('lock')} className={`flex-1 pb-2 text-center text-lg font-bold whitespace-nowrap transition-colors ${activeTab === 'lock' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Lock</button>
+        <button onClick={() => setActiveTab('transfer')} className={`flex-1 pb-2 text-center text-lg font-bold whitespace-nowrap transition-colors ${activeTab === 'transfer' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>送金</button>
       </div>
 
       <div className="w-full max-w-3xl mx-auto">
@@ -500,46 +500,44 @@ export default function DepositSection() {
                 ) : (
                     <>
                         {/* ロック入力エリア */}
-                        <div>
-                          <div className="flex justify-between items-end mb-2">
-                              <p className="text-xs font-black font-bold uppercase tracking-wider">Lock SOL</p>
-                              <span className="bg-[#EEFF77] text-black text-[10px] font-bold px-2 py-1">利率 5.0%</span>
+                        <div className="w-full bg-white border-2 border-black p-6">
+                          {/* タイトル削除 & 利率を枠内に移動 */}
+                          <div className="flex justify-between items-start mb-6">
+                              <p className="text-xs text-gray-500 leading-relaxed">
+                                  Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
+                                  <span className="font-bold text-red-500">ロック中は出金できません。</span>
+                              </p>
+                              <span className="bg-[#EEFF77] text-black text-[10px] font-bold px-2 py-1 whitespace-nowrap ml-2">
+                                  利率 5.0%
+                              </span>
                           </div>
-                          
-                          <div className="w-full bg-white border-2 border-black p-6">
-                            
-                            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                                Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
-                                <span className="font-bold text-red-500">ロック中は出金できません。</span>
-                            </p>
 
-                            <div className="mb-4">
-                                <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能: {availableToWithdraw.toFixed(2)} SOL)</p>
-                                <div className="relative w-full">
-                                    <input 
-                                        type="number" 
-                                        value={lockAmountInput} 
-                                        onChange={(e) => setLockAmountInput(e.target.value)} 
-                                        className="w-full h-12 pl-4 pr-12 text-lg font-bold border-2 border-black focus:outline-none font-mono" 
-                                        placeholder="0" 
-                                    />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">SOL</span>
-                                </div>
-                            </div>
+                          <div className="mb-4">
+                              <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能: {availableToWithdraw.toFixed(2)} SOL)</p>
+                              <div className="relative w-full">
+                                  <input 
+                                      type="number" 
+                                      value={lockAmountInput} 
+                                      onChange={(e) => setLockAmountInput(e.target.value)} 
+                                      className="w-full h-12 pl-4 pr-12 text-lg font-bold border-2 border-black focus:outline-none font-mono" 
+                                      placeholder="0" 
+                                  />
+                                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">SOL</span>
+                              </div>
+                          </div>
 
-                            <div className="mb-6">
-                                <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[1, 12, 24].map((h) => (
-                                        <button 
-                                            key={h}
-                                            onClick={() => setLockDuration(h)}
-                                            className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-blackhover:text-black'}`}
-                                        >
-                                            {h}時間
-                                        </button>
-                                    ))}
-                                </div>
+                          <div className="mb-6">
+                              <p className="text-[10px] font-bold mb-2">ロック期間を選択</p>
+                              <div className="grid grid-cols-3 gap-2">
+                                  {[1, 12, 24].map((h) => (
+                                      <button 
+                                          key={h}
+                                          onClick={() => setLockDuration(h)}
+                                          className={`h-10 text-sm font-bold border-2 border-black transition-all ${lockDuration === h ? 'bg-black text-white' : 'bg-white text-blackhover:text-black'}`}
+                                      >
+                                          {h}時間
+                                      </button>
+                                  ))}
                             </div>
 
                             <button 
