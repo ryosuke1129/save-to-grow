@@ -500,11 +500,13 @@ export default function DepositSection() {
                 ) : (
                     <>
                         {/* ロック入力エリア */}
-                        <div className="w-full bg-white border-2 border-black p-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <p className="text-xs font-black font-bold uppercase tracking-wider">Lock SOL</p>
-                                <span className="bg-[#EEFF77] text-black text-[10px] font-bold px-2 py-1">利率 5.0%</span>
-                            </div>
+                        <div>
+                          <div className="flex justify-between items-end mb-2">
+                              <p className="text-xs font-black font-bold uppercase tracking-wider">Lock SOL</p>
+                              <span className="bg-[#EEFF77] text-black text-[10px] font-bold px-2 py-1">利率 5.0%</span>
+                          </div>
+                          
+                          <div className="w-full bg-white border-2 border-black p-6">
                             
                             <p className="text-xs text-gray-500 mb-6 leading-relaxed">
                                 Grow Box内のSOLを一時的にロックしてリワードを獲得します。<br/>
@@ -512,7 +514,7 @@ export default function DepositSection() {
                             </p>
 
                             <div className="mb-4">
-                                <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能額: {availableToWithdraw.toFixed(4)} SOL)</p>
+                                <p className="text-[10px] font-bold mb-1">ロックする金額 (ロック可能額: {availableToWithdraw.toFixed(2)} SOL)</p>
                                 <div className="relative w-full">
                                     <input 
                                         type="number" 
@@ -547,6 +549,7 @@ export default function DepositSection() {
                             >
                                 ロックする
                             </button>
+                          </div>
                         </div>
 
                         {/* アクティブなロック一覧 */}
