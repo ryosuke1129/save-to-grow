@@ -9,7 +9,7 @@ const supabase = createClient(
 
 const NETWORK_URL = process.env.NEXT_PUBLIC_SOLANA_NETWORK!;
 // 配布用ウォレットの秘密鍵 (配列形式の文字列)
-const ADMIN_SECRET = JSON.parse(process.env.ADMIN_SECRET_KEY || "[]");
+const ADMIN_SECRET = JSON.parse(process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY || "[]");
 
 export async function POST(request: Request) {
   try {
