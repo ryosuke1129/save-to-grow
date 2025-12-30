@@ -672,15 +672,15 @@ export default function DepositSection() {
 
       <div className="w-full bg-white border-2 border-black p-5 mb-8 max-w-3xl mx-auto">
         <div className="flex flex-col mb-3">
-            <p className="text-xs font-black font-bold mb-1 text-gray-500 uppercase tracking-wider">Wallet残高</p>
-            <p className="text-4xl font-mono font-black text-black tracking-tighter">{animatedWalletBalance.toFixed(6)} <span className="text-lg text-gray-400 font-bold">SOL</span></p>
+            <p className="text-xs font-black font-bold mb-1 text-black tracking-wider text-left">Wallet残高</p>
+            <p className="text-3xl font-mono font-black text-black tracking-tighter text-right">{animatedWalletBalance.toFixed(6)} <span className="text-lg text-gray-400 font-bold">SOL</span></p>
         </div>
         <button onClick={copyAddress} className={`w-full text-left border border-black py-2 px-3 font-mono text-xs text-gray-500 flex justify-between items-center group transition-colors duration-200 ${isCopied ? 'bg-[#EEFF77]' : 'bg-white hover:bg-gray-50'}`}>
             <span>{shortAddress}</span><span className={`text-black font-bold ${isCopied ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>{isCopied ? 'COPIED!' : 'COPY'}</span>
         </button>
       </div>
 
-      <div className="flex w-full max-w-3xl mx-auto mb-8 border-b-2 border-gray-100 gap-2 md:gap-8">
+      <div className="flex w-full max-w-2xl mx-auto mb-8 border-b-2 border-gray-100 gap-2 md:gap-8">
         <button onClick={() => setActiveTab('box')} className={`flex-1 pb-2 text-center text-lg font-black transition-colors ${activeTab === 'box' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>Box</button>
         <button onClick={() => setActiveTab('nft')} className={`flex-1 pb-2 text-center text-lg font-black transition-colors ${activeTab === 'nft' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>NFT</button>
         <button onClick={() => setActiveTab('transfer')} className={`flex-1 pb-2 text-center text-lg font-black transition-colors ${activeTab === 'transfer' ? 'border-b-4 border-black text-black' : 'text-gray-300 hover:text-gray-500'}`}>送金</button>
@@ -701,7 +701,7 @@ export default function DepositSection() {
                     <>
                         <div className="text-center w-full bg-white border-2 border-black p-6">
                             <p className="text-xs font-black font-bold tracking-[0.1em] mb-3">Grow Box残高</p>
-                            <div className="flex items-baseline justify-center"><span className="text-6xl font-black tracking-tighter text-black leading-none font-mono">{animatedVaultBalance.toFixed(2)}</span><span className="text-2xl font-bold ml-2 text-gray-500">SOL</span></div>
+                            <div className="flex items-baseline justify-center"><span className="text-5xl font-black tracking-tighter text-black leading-none font-mono">{animatedVaultBalance.toFixed(2)}</span><span className="text-2xl font-bold ml-2 text-gray-500">SOL</span></div>
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="relative w-full mb-2">
