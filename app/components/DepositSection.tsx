@@ -63,6 +63,7 @@ export default function DepositSection() {
   const [activeTab, setActiveTab] = useState<'lock' | 'box' | 'transfer' | 'nft'>('nft');
 
   const [email, setEmail] = useState("");
+  const [isEmailSent, setIsEmailSent] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(false);
   const [myWallet, setMyWallet] = useState<Keypair | null>(null);
@@ -176,8 +177,12 @@ export default function DepositSection() {
     fetchTransferHistory(session.user.id);
   };
 
-  const checkWalletExistence = async (userId: string) => { /* 既存のコード */
-    setLoading(true);
+  const checkWalletExistence = async (userId: string) => {
+    // 既にウォレットがロードされているなら、ローディング画面を出さない（画面リセット防止）
+    if (!myWallet) {
+        setLoading(true);
+    }
+    
     try {
       const { data } = await supabase.from('user_wallets').select('*').eq('user_id', userId).single();
       if (data) {
@@ -186,8 +191,15 @@ export default function DepositSection() {
         setMyWallet(kp);
         const mintKeypair = getDeterministicMintKeypair(kp.publicKey);
         setNftMintAddress(mintKeypair.publicKey.toString());
-      } else { setMyWallet(null); setNftMintAddress(null); }
-    } catch (error) { setMyWallet(null); } finally { setLoading(false); }
+      } else { 
+        setMyWallet(null); 
+        setNftMintAddress(null); 
+      }
+    } catch (error) { 
+      setMyWallet(null); 
+    } finally { 
+      setLoading(false); 
+    }
   };
   const createNewWallet = async () => { /* 既存のコード... */ 
       if (!session) return; setLoading(true);
@@ -210,11 +222,23 @@ export default function DepositSection() {
           alert("削除しました");
       } catch(e) { console.error(e); } finally { setLoading(false); }
   };
-  const handleLogin = async (e: React.FormEvent) => { /* 既存のコード */
-    e.preventDefault(); setAuthLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
-    if (error) alert(error.message); else alert("リンクを送信しました"); setAuthLoading(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); 
+    setAuthLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({ 
+        email, 
+        options: { emailRedirectTo: window.location.origin } 
+    });
+    
+    if (error) {
+        alert(error.message);
+    } else {
+        setIsEmailSent(true); // ★アラートではなく画面切り替え
+    }
+    setAuthLoading(false);
   };
+
   const handleLogout = async () => { await supabase.auth.signOut(); };
 
   // --- Solana Helpers (省略なし) ---
@@ -394,25 +418,46 @@ export default function DepositSection() {
     <div className="min-h-screen flex items-center justify-center bg-white font-sans px-4">
       <div className="w-full max-w-md bg-white border-2 border-black p-8 text-center">
         <h1 className="text-3xl font-black mb-2 tracking-tight">Web3 Wallet</h1>
-        <p className="text-sm text-gray-500 font-bold mb-8">まずはウォレットにログインしましょう</p>
         
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input 
-            type="email" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            className="w-full h-12 border-2 border-black px-4 font-bold placeholder-gray-400 focus:outline-none transition-colors" 
-            required 
-            placeholder="メールアドレスを入力"
-          />
-          <button 
-            type="submit" 
-            disabled={authLoading}
-            className="w-full h-12 bg-black text-white font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
-            {authLoading ? "送信中..." : "ログインリンクを送信する"}
-          </button>
-        </form>
+        {!isEmailSent ? (
+            // 送信前：フォームを表示
+            <>
+                <p className="text-sm text-gray-500 font-bold mb-8">ウォレットにログインしましょう</p>
+                
+                <form onSubmit={handleLogin} className="flex flex-col gap-4">
+                    <input 
+                        type="email" 
+                        value={email} 
+                        onChange={e => setEmail(e.target.value)} 
+                        className="w-full h-12 border-2 border-black px-4 font-bold placeholder-gray-400 focus:outline-none transition-colors" 
+                        required 
+                        placeholder="メールアドレスを入力"
+                    />
+                    <button 
+                        type="submit" 
+                        disabled={authLoading}
+                        className="w-full h-12 bg-black text-white font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    >
+                        {authLoading ? "送信中..." : "ログインリンクを送信する"}
+                    </button>
+                </form>
+            </>
+        ) : (
+            // 送信後：メッセージを表示
+            <div className="py-10 animate-fade-in">
+                <div className="mb-6 flex justify-center">
+                    {/* チェックマークアイコン */}
+                    <svg className="w-16 h-16 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <p className="text-base font-bold leading-loose text-gray-800">
+                    この画面を閉じて<br/>
+                    メールのログインリンクから<br/>
+                    ログインしてください
+                </p>
+            </div>
+        )}
       </div>
     </div>
   );
@@ -460,7 +505,7 @@ export default function DepositSection() {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 animate-fade-in font-sans min-h-[600px] flex flex-col relative">
+    <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 font-sans min-h-[600px] flex flex-col relative">
       <div className="absolute top-4 right-4 md:top-8 md:right-8">
         <div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email?.split('@')[0]}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">ログアウト</button></div>
       </div>
