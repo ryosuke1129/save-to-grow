@@ -47,7 +47,14 @@ async function retryRPC<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Pro
 type TxType = "Deposit" | "Withdraw" | "Initialize" | "Reward"; 
 
 interface VaultRecord { id: string; type: TxType; amount: number; gas: number; date: string; }
-interface TransferRecord { id: string; destination: string; amount: number; fee: number; date: string; }
+interface TransferRecord { 
+  id: string; 
+  type: 'send' | 'receive'; // ★送受のタイプを追加
+  address: string;          // destination ではなく address (相手先) に変更
+  amount: number; 
+  fee: number; 
+  date: string; 
+}
 interface LockRecord { id: string; amount: number; duration_hours: number; ends_at: string; status: string; reward_amount: number; } // ★追加
 
 class SimpleWallet {
@@ -100,7 +107,7 @@ export default function DepositSection() {
       if (session) {
           checkWalletExistence(session.user.id);
           fetchVaultHistory(session.user.id);
-          fetchTransferHistory(session.user.id);
+          // fetchTransferHistory(session.user.id);
           fetchLocks(session.user.id); // ★ロック情報の取得
       }
     });
@@ -110,7 +117,7 @@ export default function DepositSection() {
       if (session) {
         checkWalletExistence(session.user.id);
         fetchVaultHistory(session.user.id);
-        fetchTransferHistory(session.user.id);
+        // fetchTransferHistory(session.user.id);
         fetchLocks(session.user.id);
       } else {
         setMyWallet(null); setNftMintAddress(null); setWalletBalance(0); setBalance("0"); setRewardBalance("0");
@@ -121,18 +128,19 @@ export default function DepositSection() {
   }, []);
 
   // リアルタイム更新の設定などは省略せずそのまま維持推奨... (ここではスペース節約のため省略なしで記述)
-  useEffect(() => {
-    if (!session) return;
-    const channelVault = supabase.channel('vault_changes').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transaction_history', filter: `user_id=eq.${session.user.id}` }, () => fetchVaultHistory(session.user.id)).subscribe();
-    const channelTransfer = supabase.channel('transfer_changes').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transfer_history', filter: `user_id=eq.${session.user.id}` }, () => fetchTransferHistory(session.user.id)).subscribe();
-    // ★ Lockの変更も監視
-    const channelLocks = supabase.channel('lock_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'box_locks', filter: `user_id=eq.${session.user.id}` }, () => fetchLocks(session.user.id)).subscribe();
-    return () => { supabase.removeChannel(channelVault); supabase.removeChannel(channelTransfer); supabase.removeChannel(channelLocks); };
-  }, [session]);
+  // useEffect(() => {
+  //   if (!session) return;
+  //   const channelVault = supabase.channel('vault_changes').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transaction_history', filter: `user_id=eq.${session.user.id}` }, () => fetchVaultHistory(session.user.id)).subscribe();
+  //   const channelTransfer = supabase.channel('transfer_changes').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transfer_history', filter: `user_id=eq.${session.user.id}` }, () => fetchTransferHistory(session.user.id)).subscribe();
+  //   // ★ Lockの変更も監視
+  //   const channelLocks = supabase.channel('lock_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'box_locks', filter: `user_id=eq.${session.user.id}` }, () => fetchLocks(session.user.id)).subscribe();
+  //   return () => { supabase.removeChannel(channelVault); supabase.removeChannel(channelTransfer); supabase.removeChannel(channelLocks); };
+  // }, [session]);
 
   useEffect(() => {
     if (myWallet) {
       fetchWalletBalance();
+      fetchSolanaTransferHistory();
       setTimeout(() => fetchVault(), 500);
     }
   }, [myWallet]);
@@ -149,14 +157,84 @@ export default function DepositSection() {
           })));
       }
   };
-  const fetchTransferHistory = async (userId: string) => { /* 既存のコード */
-      const { data } = await supabase.from('transfer_history').select('*').eq('user_id', userId).order('created_at', { ascending: false });
-      if (data) {
-          setTransferHistory(data.map((item: any) => ({
-              id: item.id, destination: item.destination, amount: Number(item.amount), fee: Number(item.fee),
-              date: new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          })));
-      }
+  const fetchSolanaTransferHistory = async () => {
+    if (!myWallet) return;
+    try {
+      const pubkey = myWallet.publicKey;
+      // 最新20件の署名を取得
+      const signatures = await connection.getSignaturesForAddress(pubkey, { limit: 20 });
+      
+      // トランザクション詳細を一括取得
+      const txs = await connection.getParsedTransactions(signatures.map(s => s.signature), {
+          maxSupportedTransactionVersion: 0,
+          commitment: 'confirmed'
+      });
+
+      const records: TransferRecord[] = [];
+
+      txs.forEach((tx, i) => {
+          if (!tx || !tx.meta) return;
+          
+          const signature = signatures[i].signature;
+          // 日時 (Unix Timestamp * 1000)
+          const blockTime = signatures[i].blockTime ? new Date(signatures[i].blockTime! * 1000) : new Date();
+          const dateStr = blockTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          // 自分のウォレットの残高変化を計算
+          const accountIndex = tx.transaction.message.accountKeys.findIndex(k => k.pubkey.toString() === pubkey.toString());
+          if (accountIndex === -1) return;
+
+          const pre = tx.meta.preBalances[accountIndex];
+          const post = tx.meta.postBalances[accountIndex];
+          const diff = post - pre;
+
+          if (diff === 0) return; // 変化なし（失敗したTxなど）はスキップ
+
+          const isSend = diff < 0; // 残高が減っていれば送信
+          const fee = tx.meta.fee;
+          
+          // 自分が手数料を払ったか判定 (AccountKeysの先頭がPayer)
+          const isPayer = tx.transaction.message.accountKeys[0].pubkey.toString() === pubkey.toString();
+          
+          // 純粋な送金額の計算 (自分がPayerなら、減った額から手数料を引く)
+          let netAmount = Math.abs(diff);
+          if (isSend && isPayer) {
+            netAmount -= fee;
+          }
+          
+          // 相手先アドレスの特定 (簡易的ロジック)
+          let otherAddress = "Unknown";
+          try {
+              const instructions = tx.transaction.message.instructions;
+              for (const ix of instructions) {
+                  // System ProgramのTransfer命令を探す
+                  if ('parsed' in ix && ix.program === 'system' && ix.parsed.type === 'transfer') {
+                      const info = ix.parsed.info;
+                      if (isSend && info.source === pubkey.toString()) {
+                          otherAddress = info.destination; // 送信なら宛先
+                          break;
+                      } else if (!isSend && info.destination === pubkey.toString()) {
+                          otherAddress = info.source;      // 受信なら送信元
+                          break;
+                      }
+                  }
+              }
+          } catch (e) {}
+
+          records.push({
+              id: signature,
+              type: isSend ? 'send' : 'receive',
+              address: otherAddress,
+              amount: netAmount / LAMPORTS_PER_SOL,
+              fee: fee / LAMPORTS_PER_SOL,
+              date: dateStr
+          });
+      });
+
+      setTransferHistory(records);
+    } catch (e) {
+      console.error("History fetch error", e);
+    }
   };
   // ★ Lock情報の取得
   const fetchLocks = async (userId: string) => {
@@ -174,7 +252,7 @@ export default function DepositSection() {
     if (!session) return;
     const { data, error } = await supabase.from('transfer_history').insert([{ user_id: session.user.id, destination, amount, fee }]).select();
     if (!error && data && data[0]) triggerHighlight(data[0].id);
-    fetchTransferHistory(session.user.id);
+    // fetchTransferHistory(session.user.id);
   };
 
   const checkWalletExistence = async (userId: string) => {
@@ -329,6 +407,7 @@ export default function DepositSection() {
           const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey: myWallet.publicKey, toPubkey: recipientPubkey, lamports: Math.floor(val * LAMPORTS_PER_SOL) }));
           await connection.confirmTransaction(await connection.sendTransaction(tx, [myWallet]), "confirmed");
           await addTransferHistory(recipientAddress, val, 0.000005); setRecipientAddress(""); setTransferAmountInput(""); await fetchWalletBalance();
+          setTimeout(() => fetchSolanaTransferHistory(), 2000);
       } catch (e: any) { alert(e.message); } finally { setActionLoading(false); }
   };
 
@@ -779,20 +858,39 @@ export default function DepositSection() {
                 <div className="flex flex-col h-[400px]">
                     <div className="flex justify-between items-end mb-2"><p className="text-xs font-black font-bold tracking-wider">SOL 送金履歴</p></div>
                     <div className="flex-1 overflow-y-auto bg-white border-2 border-black p-2 space-y-2">
-                        {transferHistory.length === 0 ? (<div className="h-full flex items-center justify-center text-gray-300 font-bold text-sm">送信履歴はありません</div>) : (
-                            transferHistory.map((record) => (
-                                <div key={record.id} className={`p-4 border border-gray-200 hover:border-black transition-colors duration-500 ${record.id === highlightId ? 'bg-[#EEFF77]' : 'bg-white'}`}>
-                                    <div className="flex justify-between items-center mb-1">
-                                        <div className="flex items-center gap-2"><span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5">SEND</span><span className="text-xs font-mono text-gray-400">{record.date}</span></div>
-                                        <span className="font-mono font-bold text-xl text-black text-red-500">-{record.amount} <span className="text-sm text-gray-400">SOL</span></span>
-                                    </div>
-                                    <div className="flex justify-between items-end">
-                                        <div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">TO:</span><span className="text-xs font-mono text-gray-600 break-all">{record.destination}</span></div>
-                                        <div className="text-right min-w-[80px]"><span className="text-[10px] text-gray-400 font-bold block">GAS</span><span className="text-xs font-mono text-gray-600">{record.fee.toFixed(6)}</span></div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
+                        {transferHistory.length === 0 ? (<div className="h-full flex items-center justify-center text-gray-300 font-bold text-sm">履歴はありません</div>) : (
+                          transferHistory.map((record) => (
+                              <div key={record.id} className={`p-4 border border-gray-200 hover:border-black transition-colors duration-500 ${record.id === highlightId ? 'bg-[#EEFF77]' : 'bg-white'}`}>
+                                  <div className="flex justify-between items-center mb-1">
+                                      <div className="flex items-center gap-2">
+                                          {/* タイプによるバッジの切り替え */}
+                                          {record.type === 'send' ? (
+                                              <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5">SEND</span>
+                                          ) : (
+                                              <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5">RECEIVE</span>
+                                          )}
+                                          <span className="text-xs font-mono text-gray-400">{record.date}</span>
+                                      </div>
+                                      
+                                      {/* 金額の色分けと符号 */}
+                                      <span className={`font-mono font-bold text-xl ${record.type === 'send' ? 'text-red-500' : 'text-blue-500'}`}>
+                                          {record.type === 'send' ? '-' : '+'}{record.amount.toFixed(4)} <span className="text-sm text-gray-400">SOL</span>
+                                      </span>
+                                  </div>
+                                  <div className="flex justify-between items-end">
+                                      <div className="flex flex-col">
+                                          {/* ラベルの切り替え */}
+                                          <span className="text-[10px] text-gray-400 font-bold">{record.type === 'send' ? 'TO:' : 'FROM:'}</span>
+                                          <span className="text-xs font-mono text-gray-600 break-all">{record.address.slice(0, 4)}...{record.address.slice(-4)}</span>
+                                      </div>
+                                      <div className="text-right min-w-[80px]">
+                                          <span className="text-[10px] text-gray-400 font-bold block">GAS</span>
+                                          <span className="text-xs font-mono text-gray-600">{record.fee.toFixed(6)}</span>
+                                      </div>
+                                  </div>
+                              </div>
+                          ))
+                      )}
                     </div>
                 </div>
             </div>
