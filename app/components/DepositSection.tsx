@@ -389,9 +389,75 @@ export default function DepositSection() {
   const shortAddress = useMemo(() => { if (!myWallet) return ""; const addr = myWallet.publicKey.toString(); return `${addr.slice(0, 8)}...${addr.slice(-8)}`; }, [myWallet]);
 
   if (!mounted) return null;
-  if (!session) return <div className="p-8 text-center mt-20 font-bold border-2 border-black max-w-md mx-auto">まずはログインしましょう<form onSubmit={handleLogin} className="mt-4"><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="border-2 border-black p-2 w-full mb-2" required placeholder="メールアドレスを入力"/><button type="submit" className="bg-black text-white w-full p-2 font-bold">{authLoading?"送信中...":"ログインリンクを受け取る"}</button></form></div>;
+  // --- ログイン画面 ---
+  if (!session) return (
+    <div className="min-h-screen flex items-center justify-center bg-white font-sans px-4">
+      <div className="w-full max-w-md bg-white border-2 border-black p-8 text-center">
+        <h1 className="text-3xl font-black mb-2 tracking-tight">Web3 Wallet</h1>
+        <p className="text-sm text-gray-500 font-bold mb-8">まずはウォレットにログインしましょう</p>
+        
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <input 
+            type="email" 
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            className="w-full h-12 border-2 border-black px-4 font-bold placeholder-gray-400 focus:outline-none transition-colors" 
+            required 
+            placeholder="メールアドレスを入力"
+          />
+          <button 
+            type="submit" 
+            disabled={authLoading}
+            className="w-full h-12 bg-black text-white font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+          >
+            {authLoading ? "送信中..." : "ログインリンクを送信する"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
   if (loading) return <div className="h-screen flex items-center justify-center font-bold text-2xl animate-pulse">Wallet Loading...</div>;
-  if (!myWallet) return ( /* ウォレット作成画面 (既存コードのまま) */ <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 font-sans min-h-[600px] flex flex-col justify-center relative"><div className="absolute top-4 right-4"><button onClick={handleLogout} className="text-xs text-gray-400 font-bold underline">ログアウト</button></div><div className="flex flex-col items-center w-full max-w-md mx-auto"><h2 className="text-2xl font-black mb-4">Welcome to Web3 Wallet</h2><p className="text-l text-gray-500 text-center font-bold mb-4">まだウォレットがありません<br/>アプリ専用のウォレットを作成しましょう</p><button onClick={createNewWallet} className="w-full h-14 bg-black text-white font-bold">ウォレット作成</button></div></div> );
+  // --- ウォレット作成画面 ---
+  if (!myWallet) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white font-sans relative p-6">
+      {/* 右上のユーザー情報 */}
+      <div className="absolute top-8 right-8 text-right">
+        <p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email}</p>
+        <button 
+          onClick={handleLogout} 
+          className="text-xs font-bold text-gray-400 hover:text-black transition-colors underline decoration-gray-400 underline-offset-2"
+        >
+          Logout
+        </button>
+      </div>
+
+      {/* 中央のコンテンツ */}
+      <div className="w-full max-w-md flex flex-col items-center text-center mt-[-40px]">
+        {/* プラスアイコン */}
+        <div className="mb-6">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4V20M4 12H20" stroke="#E5E7EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+        </div>
+        
+        <h2 className="text-2xl font-black mb-6 tracking-tight">Welcome to Web3 Wallet</h2>
+        
+        <p className="text-gray-500 font-bold leading-loose mb-10 text-sm">
+            まだウォレットがありません。<br/>
+            アプリ専用のウォレットを作成して<br/>
+            資産形成を始めましょう
+        </p>
+
+        <button 
+            onClick={createNewWallet} 
+            disabled={loading}
+            className="w-full h-14 bg-black text-white font-bold text-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+        >
+            {loading ? "作成中..." : "ウォレットを新規作成"}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 animate-fade-in font-sans min-h-[600px] flex flex-col relative">
