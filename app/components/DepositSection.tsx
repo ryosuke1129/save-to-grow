@@ -506,7 +506,7 @@ export default function DepositSection() {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 font-sans min-h-[600px] flex flex-col relative overscroll-y-none" style={{ overflowAnchor: 'none' }}>
+    <div className="w-full max-w-5xl mx-auto bg-white p-4 md:p-6 font-sans min-h-[600px] flex flex-col relative overscroll-y-none" style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }}>
       <div className="absolute top-4 right-4 md:top-8 md:right-8">
         <div className="text-right"><p className="text-[10px] text-gray-400 font-bold mb-1">{session.user.email?.split('@')[0]}</p><button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors underline">ログアウト</button></div>
       </div>
