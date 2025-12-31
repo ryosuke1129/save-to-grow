@@ -285,7 +285,7 @@ export default function DepositSection() {
   const initializeVault = async () => { /* 既存コード */
       if (!myWallet || !session) return; const provider = getProvider(); const vaultPda = getVaultPda(); const rewardPda = getRewardPda(); if (!provider || !vaultPda || !rewardPda) return;
       try { setActionLoading(true); const preBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey)); const program = new Program(idl as any, provider) as any;
-          await program.methods.initialize().accounts({ vault: vaultPda, rewardBox: rewardPda, user: myWallet.publicKey, systemProgram: SystemProgram.programId }).signers([myWallet]).rpc();
+          await program.methods.initialize().accounts({ vault: vaultPda, rewardBox: rewardPda, user: myWallet.publicKey, systemProgram: SystemProgram.programId }).rpc();
           const mintAddress = await mintGrowNft(myWallet); setNftMintAddress(mintAddress);
           const postBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey)); await addVaultHistory("Initialize", 0, (preBalance - postBalance) / LAMPORTS_PER_SOL); await fetchVault(); await fetchWalletBalance(); setActiveTab('nft');
       } catch (e) { alert("初期化エラー"); } finally { setActionLoading(false); }
@@ -295,7 +295,7 @@ export default function DepositSection() {
       if (!myWallet) return; const provider = getProvider(); const vaultPda = getVaultPda(); const rewardPda = getRewardPda(); if (!provider || !vaultPda || !rewardPda) return;
       const val = parseFloat(amountInput); if (isNaN(val) || val <= 0) { alert("金額不正"); return; }
       try { setActionLoading(true); const preBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey)); const program = new Program(idl as any, provider) as any;
-          await program.methods.deposit(new BN(Math.floor(val * LAMPORTS_PER_SOL))).accounts({ vault: vaultPda, rewardBox: rewardPda, user: myWallet.publicKey, systemProgram: SystemProgram.programId }).signers([myWallet]).rpc({ skipPreflight: true });
+          await program.methods.deposit(new BN(Math.floor(val * LAMPORTS_PER_SOL))).accounts({ vault: vaultPda, rewardBox: rewardPda, user: myWallet.publicKey, systemProgram: SystemProgram.programId }).rpc({ skipPreflight: true });
           const postBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey));
           await addVaultHistory("Deposit", val, (preBalance - postBalance) / LAMPORTS_PER_SOL - val); await fetchVault(); await fetchWalletBalance(); setAmountInput("");
           const currentVaultSol = (Number(balance) + Math.floor(val * LAMPORTS_PER_SOL)) / LAMPORTS_PER_SOL;
@@ -314,7 +314,7 @@ export default function DepositSection() {
       }
 
       try { setActionLoading(true); const preBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey)); const program = new Program(idl as any, provider) as any;
-          await program.methods.withdraw(new BN(Math.floor(val * LAMPORTS_PER_SOL))).accounts({ vault: vaultPda, rewardBox: rewardPda, user: myWallet.publicKey, systemProgram: SystemProgram.programId }).signers([myWallet]).rpc({ skipPreflight: true });
+          await program.methods.withdraw(new BN(Math.floor(val * LAMPORTS_PER_SOL))).accounts({ vault: vaultPda, rewardBox: rewardPda, user: myWallet.publicKey, systemProgram: SystemProgram.programId }).rpc({ skipPreflight: true });
           const postBalance = await retryRPC(() => connection.getBalance(myWallet.publicKey)); 
           const actualReceived = postBalance - preBalance; const expected = Math.floor(val * LAMPORTS_PER_SOL);
           await addVaultHistory("Withdraw", val, (expected - actualReceived) / LAMPORTS_PER_SOL); await fetchVault(); await fetchWalletBalance(); setAmountInput("");
