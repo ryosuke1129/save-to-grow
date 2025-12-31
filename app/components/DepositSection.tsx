@@ -452,6 +452,7 @@ export default function DepositSection() {
                     </svg>
                 </div>
                 <p className="text-base font-bold leading-loose text-gray-800">
+                    メールを送信しました<br/>
                     この画面を閉じて<br/>
                     メールのログインリンクから<br/>
                     ログインしてください
@@ -488,7 +489,7 @@ export default function DepositSection() {
         <h2 className="text-2xl font-black mb-6 tracking-tight">Welcome to Web3 Wallet</h2>
         
         <p className="text-gray-500 font-bold leading-loose mb-10 text-sm">
-            まだウォレットがありません。<br/>
+            まだウォレットがありません<br/>
             アプリ専用のウォレットを作成して<br/>
             資産形成を始めましょう
         </p>
@@ -682,7 +683,7 @@ export default function DepositSection() {
                             <button 
                                 onClick={handleLock} 
                                 disabled={actionLoading || availableToWithdraw <= 0}
-                                className="w-full h-14 bg-black text-white border-2 border-black font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:bg-gray-200"
+                                className="h-14 px-8 bg-black text-white font-bold transition-colors hover:bg-gray-800 disabled:opacity-30 whitespace-nowrap"
                             >
                                 ロックする
                             </button>
